@@ -1,0 +1,25 @@
+{  
+   "externalId":"Test-Api-User",
+   "meta":{  
+      "version":0
+   },
+   "userName":"testuser2",
+   "emails":[  
+      {  
+         "value":"email-id",
+         "primary":true
+      }
+   ],
+   "phoneNumbers":[  
+      {  
+         "value":"5555555555"
+      }
+   ],
+   "active":true,
+   "verified":true,
+   "origin":"",
+   "password":"AdminSecret@Pass123",
+   "schemas":[  
+      "urn:scim:schemas:core:1.0"
+   ]
+}
