@@ -1,0 +1,9 @@
+{  
+   "name":"test1",
+   "space_guid":"b08a9718-b277-43bb-9499-9ed7647481d3",
+   "diego":true,
+   "ports":[  
+      1024,
+      2000
+   ]
+}
