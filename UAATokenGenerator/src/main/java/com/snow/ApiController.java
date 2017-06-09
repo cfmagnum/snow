@@ -9,10 +9,14 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JacksonJsonParser;
+import org.springframework.cloud.app.ApplicationInstanceInfo;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,10 +34,11 @@ public class ApiController {
    private String json ="grant_type=password&username=admin&password=JioovG*jCadGect37mkyuur9kyat$"; 
    RestTemplate restTemplate = new RestTemplate();
    
+   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
    
-   
-   @RequestMapping("/Snow-proxy/v2/Authorization")
-   public String getAuthorizationToken() {
+   @RequestMapping("/")
+   public String getAuthorizationToken(Model model) {
+	   model.addAttribute("instanceInfo", instanceInfo);
 	    headers.add("Authorization", "Basic Y2Y6");
 	    headers.add("cache-control", "no-cache");
 	    headers.add("Content-Type", "application/x-www-form-urlencoded");
