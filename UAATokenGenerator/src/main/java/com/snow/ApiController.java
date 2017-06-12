@@ -36,7 +36,7 @@ public class ApiController {
    
    @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
    
-   @RequestMapping("/")
+   @RequestMapping("/v1/get-UAA-token")
    public String getAuthorizationToken(Model model) {
 	   model.addAttribute("instanceInfo", instanceInfo);
 	    headers.add("Authorization", "Basic Y2Y6");
