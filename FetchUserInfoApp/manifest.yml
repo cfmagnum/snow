@@ -2,5 +2,5 @@
 applications:
 - name: FetchUserInformation
   instances: 1
-  host: Snow-Host
+  host: FetchUserInformation
   path: target/FetchUserInformation-0.0.1-SNAPSHOT.jar
