@@ -6,9 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @EnableAutoConfiguration
-public class FetchUserInfoAppApplication {
+public class Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(FetchUserInfoAppApplication.class, args);
+		SpringApplication.run(Application.class, args);
 	}
 }
