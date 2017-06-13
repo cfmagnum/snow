@@ -1,6 +1,6 @@
 {  
-   "name":"test1",
-   "space_guid":"e3fb5b49-d89e-4192-8cfd-7be984b34cb0",
+   "name":"FetchUserInformation",
+   "space_guid":"bfd1aee9-56eb-4f6d-992a-c37d64a6e792",
    "diego":true,
    "ports":[  
       1024,

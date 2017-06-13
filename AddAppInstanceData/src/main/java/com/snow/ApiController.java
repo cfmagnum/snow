@@ -46,8 +46,9 @@ public class ApiController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	 
-	    String json = IOUtils.toString(new FileInputStream("AppData.json"));
+	    ClassLoader classLoader = getClass().getClassLoader();
+	    String json = IOUtils.toString(classLoader.getResourceAsStream("AppData.json"));
+	    System.out.println(json);
 	    HttpEntity<String> httpEntity = new HttpEntity<>(json, headers);
 		return restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
 		
