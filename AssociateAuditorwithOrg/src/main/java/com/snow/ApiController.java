@@ -49,7 +49,7 @@ public class ApiController {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 	    String uaatoken =  getUaaToken();
-	    String orgName = "snow-test4";
+	    String orgName = "mayuri";
 	    String orgGuid= getOrgGuid(orgName);
 	    String userEmailId = "admin";
 	    String uaaId= getUserUaaId(userEmailId);

@@ -36,6 +36,7 @@ public class ApiController {
 	@RequestMapping("/v1/add-app-instance")   
 	public ResponseEntity<String> AddAppInstanceData(Model model) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
+		ClassLoader classLoader = getClass().getClassLoader();
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/json");
@@ -46,7 +47,7 @@ public class ApiController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    ClassLoader classLoader = getClass().getClassLoader();
+	    
 	    String json = IOUtils.toString(classLoader.getResourceAsStream("AppData.json"));
 	    System.out.println(json);
 	    HttpEntity<String> httpEntity = new HttpEntity<>(json, headers);
