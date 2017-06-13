@@ -47,7 +47,7 @@ public class ApiController {
 			e.printStackTrace();
 		}
 	 
-	    String json = IOUtils.toString(new FileInputStream("./src/main/resources/AppData.json"));
+	    String json = IOUtils.toString(new FileInputStream("AppData.json"));
 	    HttpEntity<String> httpEntity = new HttpEntity<>(json, headers);
 		return restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
 		
