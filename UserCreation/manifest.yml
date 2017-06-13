@@ -1,6 +1,6 @@
 ---
 applications:
-- name: AddAppInstanceData
+- name: UserCreation
   instances: 1
-  host: AddAppInstanceData
+  host: UserCreation
   path: target/UserCreation-0.0.1-SNAPSHOT.jar
