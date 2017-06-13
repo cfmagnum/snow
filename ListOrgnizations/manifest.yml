@@ -2,5 +2,5 @@
 applications:
 - name: ListOrganizations
   instances: 1
-  host: ListOrganizations
+  host: api
   path: target/ListOrgnizations-0.0.1-SNAPSHOT.jar
