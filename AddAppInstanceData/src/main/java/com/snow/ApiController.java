@@ -26,11 +26,13 @@ import org.springframework.web.client.RestTemplate;
 public class ApiController {
 	   private String url ="https://api.sys.eu.cfdev.canopy-cloud.com/v2/apps";  
 	   private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-	   private String uaaUrl = "http://localhost:8181/Snow-proxy/v2/Authorization";
+	   private String uaaUrl = "http://snow-host.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
 	   RestTemplate restTemplate = new RestTemplate();
+	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
-	@RequestMapping("/Snow-proxy/v2/AddAppInstance")   
-	public ResponseEntity<String> AddAppInstanceData() throws FileNotFoundException, IOException{
+	@RequestMapping("/v1/add-app-instance")   
+	public ResponseEntity<String> AddAppInstanceData(Model model) throws FileNotFoundException, IOException{
+		model.addAttribute("instanceInfo", instanceInfo);
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/json");
