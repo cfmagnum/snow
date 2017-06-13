@@ -39,6 +39,8 @@ import com.google.gson.JsonSyntaxException;
 public class ApiController {
 	  // private String orgurl ="https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations";  
 	  // private String uaaUrl = "http://localhost:8181/Snow-proxy/v2/Authorization";
+	
+	
 	 private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";   
 	RestTemplate restTemplate = new RestTemplate();
 	 
