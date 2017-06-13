@@ -1,13 +1,13 @@
 package com.snow;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 
-import org.apache.commons.io.IOUtils;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.app.ApplicationInstanceInfo;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,11 +18,13 @@ import org.springframework.web.client.RestTemplate;
 public class ApiController {
 	   private String url ="http://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations";  
 	   private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-	   private String uaaUrl = "http://localhost:8181/Snow-proxy/v2/Authorization";
+	   private String uaaUrl = "http://snow-host.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
 	   RestTemplate restTemplate = new RestTemplate();
-	 
-	@RequestMapping("/Snow-proxy/v2/ListOrgs")   
-	public ResponseEntity<String> getOrgs() throws FileNotFoundException, IOException{
+	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
+	   
+	@RequestMapping("/v1/list-Organizations")   
+	public ResponseEntity<String> getOrgs(Model model){
+		model.addAttribute("instanceInfo", instanceInfo);
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/json");
