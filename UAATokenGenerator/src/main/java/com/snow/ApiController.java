@@ -51,6 +51,12 @@ public class ApiController {
 			}
 		});	
 	  
+	   /* HttpTransportProperties.ProxyProperties proxyProperties = new HttpTransportProperties.ProxyProperties();
+	    proxyProperties.setDomain("ww930");
+	    proxyProperties.setProxyName("proxy-de.glb.my-it-solutions.net");
+	    proxyProperties.setProxyPort(84);
+	    configurationContext.setProperty(HTTPConstants.PROXY, proxyProperties);
+	    */
 	    
 	    HttpEntity<String> httpEntity = new HttpEntity<>(json, headers);
 	    try {
