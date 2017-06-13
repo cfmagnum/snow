@@ -3,5 +3,5 @@ applications:
 - name: AddAppInstanceData
   instances: 1
   host: AddAppInstanceData
-  path: target/ AddAppInstanceData-0.0.1-SNAPSHOT.jar
+  path: target/AddAppInstanceData-0.0.1-SNAPSHOT.jar
 
