@@ -14,6 +14,9 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import org.apache.commons.io.IOUtils;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.ui.Model;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -29,11 +32,13 @@ import org.springframework.web.client.RestTemplate;
 public class ApiController {
 	   private String url ="https://uaa.sys.eu.cfdev.canopy-cloud.com/Users";  
 	   private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-	   private String uaaUrl = "http://localhost:8181/Snow-proxy/v2/Authorization";
+	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
 	   RestTemplate restTemplate = new RestTemplate();
+	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
-	@RequestMapping("/Snow-proxy/v2/CreateUser")   
-	public ResponseEntity<String> Create_User() throws FileNotFoundException, IOException{
+	@RequestMapping("/v1/CreateUser")   
+	public ResponseEntity<String> Create_User(Model model) throws FileNotFoundException, IOException{
+		model.addAttribute("instanceInfo", instanceInfo);
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/json");
