@@ -13,6 +13,9 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.io.IOUtils;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.ui.Model;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
