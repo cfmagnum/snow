@@ -2,5 +2,5 @@
 applications:
 - name: UAATokenGenerator
   instances: 1
-  host: api
+  host: UAATokenGenerator
   path: target/UAATokenGenerator-0.0.1-SNAPSHOT.jar
