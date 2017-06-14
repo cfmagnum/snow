@@ -32,10 +32,12 @@ public class ApiController {
 	@RequestMapping("/Snow-proxy/v2/CreateQuotaDefinition")   
 	public ResponseEntity<String> Create_Quota_Definition(Model model) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
+		ClassLoader classLoader = getClass().getClassLoader();
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/json");
-	    String json = IOUtils.toString(new FileInputStream("C:\\workspace\\CreateQuotaDefinition\\CreateQuotaDefinition\\src\\main\\resources\\Quota.json"));
+	    String json = IOUtils.toString(classLoader.getResourceAsStream("Quota.json"));
+		
 	    HttpEntity<String> httpEntity = new HttpEntity<>(json, headers);
 		return restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
 		
