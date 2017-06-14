@@ -28,7 +28,7 @@ public class ApiController {
 	 
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	   
-	@RequestMapping("/Snow-proxy/v2/CreateOrganization")   
+	@RequestMapping("/v1/CreateOrganization")   
 	public ResponseEntity<String> Create_Organization(Model model) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
 

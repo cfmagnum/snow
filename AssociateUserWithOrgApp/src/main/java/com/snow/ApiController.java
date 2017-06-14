@@ -44,7 +44,7 @@ public class ApiController {
 	 
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	   
-	@RequestMapping("/Snow-proxy/v2/AssociateUserWithOrg")   
+	@RequestMapping("/v1/AssociateUserWithOrg")   
 	public ResponseEntity<String> associateUserWithOrg(Model model) {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
