@@ -40,7 +40,7 @@ public class ApiController {
 	 
 	 @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
-	@RequestMapping("/v1/AssociateUserWithSpace")   
+	@RequestMapping("/v1/associate-user-with-space")   
 	public ResponseEntity<String> associateUserWithSpace(Model model) {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
