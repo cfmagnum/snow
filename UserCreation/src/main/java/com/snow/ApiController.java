@@ -36,7 +36,7 @@ public class ApiController {
 	   RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
-	@RequestMapping("/v1/CreateUser")   
+	@RequestMapping("/v1/create-user")   
 	public ResponseEntity<String> Create_User(Model model) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
 		ClassLoader classLoader = getClass().getClassLoader();
