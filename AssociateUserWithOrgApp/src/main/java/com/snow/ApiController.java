@@ -44,7 +44,7 @@ public class ApiController {
 	 
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	   
-	@RequestMapping("/v1/AssociateUserWithOrg")   
+	@RequestMapping("/v1/associate-user-with-org")   
 	public ResponseEntity<String> associateUserWithOrg(Model model) {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
