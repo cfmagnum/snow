@@ -1,6 +1,6 @@
 package com.snow;
 
-import java.io.FileInputStream;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
@@ -10,7 +10,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManager;
+
 import javax.net.ssl.X509TrustManager;
 import org.apache.commons.io.IOUtils;
 
@@ -44,7 +44,8 @@ public class ApiController {
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/json");
 	    headers.add("Accept", "application/json");
-	    String json = IOUtils.toString(classLoader.getResourceAsStream("AppData.json"));
+	    String json = IOUtils.toString(classLoader.getResourceAsStream("UserDetails.json"));
+	    		
 	    HttpEntity<String> httpEntity = new HttpEntity<>(json, headers);
 	    try {
 			skipSslValidation(url);
