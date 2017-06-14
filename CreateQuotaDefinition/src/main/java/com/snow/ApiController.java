@@ -29,7 +29,7 @@ public class ApiController {
 	 
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	   
-	@RequestMapping("/Snow-proxy/v2/CreateQuotaDefinition")   
+	@RequestMapping("/v1/create-quota-definition")   
 	public ResponseEntity<String> Create_Quota_Definition(Model model) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
 		ClassLoader classLoader = getClass().getClassLoader();
