@@ -28,14 +28,20 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.ui.Model;
+
 @RestController
 public class ApiController {
 	  // private String orgurl ="https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations";  
-	   private String uaaUrl = "http://localhost:8181/Snow-proxy/v2/Authorization";
+	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
 	   RestTemplate restTemplate = new RestTemplate();
+	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
-	@RequestMapping("/Snow-proxy/v2/ListSpaces")   
-	public ResponseEntity<String> associateUserWithOrg() {
+	@RequestMapping("/v1/list-spaces")   
+	public ResponseEntity<String> associateUserWithOrg(Model model) {
+		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 	    String uaatoken =  getUaaToken();
 	    String orgName = "snow-test4";
