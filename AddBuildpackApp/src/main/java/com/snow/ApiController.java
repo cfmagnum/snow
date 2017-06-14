@@ -35,7 +35,7 @@ public class ApiController {
 	 
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	   
-	@RequestMapping("/Snow-proxy/v2/AddBuildpack")   
+	@RequestMapping("/v1/add-build-pack")   
 	public ResponseEntity<String> Create_Quota_Definition(Model model) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
