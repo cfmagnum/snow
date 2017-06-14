@@ -28,7 +28,7 @@ public class ApiController {
 	 
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	   
-	@RequestMapping("/v1/CreateOrganization")   
+	@RequestMapping("/v1/create-organization")   
 	public ResponseEntity<String> Create_Organization(Model model) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
 
