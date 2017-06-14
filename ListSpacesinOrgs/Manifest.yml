@@ -1,0 +1,6 @@
+---
+applications:
+- name: ListSpacesinOrgs
+  instances: 1
+  host: ListSpacesinOrgs
+  path: target/ListSpacesinOrgs-0.0.1-SNAPSHOT.jar
