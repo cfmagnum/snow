@@ -1,0 +1,6 @@
+---
+applications:
+- name: CreteSpaceApp
+  instances: 1
+  host: CreteSpaceApp
+  path: target/CreteSpaceApp-0.0.1-SNAPSHOT.jar
