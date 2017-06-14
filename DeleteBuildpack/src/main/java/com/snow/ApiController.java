@@ -35,7 +35,7 @@ public class ApiController {
 	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
 	   RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
-	@RequestMapping("v2/Delete_Buildpack")   
+	@RequestMapping("v1/delete-buildpack")   
 	public HttpStatus deleteBuildpack(Model model) {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();

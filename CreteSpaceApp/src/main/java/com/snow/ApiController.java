@@ -34,7 +34,7 @@ public class ApiController {
 	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
 	   RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
-	@RequestMapping("v2/CreateSpace")   
+	@RequestMapping("v1/create-space")   
 	public ResponseEntity<String> Create_Space(Model model) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo",instanceInfo);
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
