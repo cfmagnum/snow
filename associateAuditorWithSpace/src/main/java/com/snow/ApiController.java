@@ -11,11 +11,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.X509TrustManager;
 
-
-
-
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
 import org.springframework.http.HttpEntity;
@@ -46,7 +41,7 @@ public class ApiController {
 	 
 	 @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	
-	@RequestMapping("v1/AssociateAuditorWithSpace")   
+	@RequestMapping("v1/associate-auditor-with-space")   
 	public ResponseEntity<String> associateUserWithSpace(Model model) {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
