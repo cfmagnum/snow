@@ -14,6 +14,9 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.ui.Model;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -33,11 +36,13 @@ import com.google.gson.JsonSyntaxException;
 @RestController
 public class ApiController {
 	  // private String orgurl ="https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations";  
-	   private String uaaUrl = "http://localhost:8181/Snow-proxy/v2/Authorization";
+	   private String uaaUrl = "http://snow-host.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
 	   RestTemplate restTemplate = new RestTemplate();
+	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
-	@RequestMapping("/Snow-proxy/v2/UpdateQuotaSizeOfOrg")   
-	public ResponseEntity<String> associateUserWithOrg() throws FileNotFoundException, IOException {
+	@RequestMapping("/v1/update-quota-size-of-org")   
+	public ResponseEntity<String> associateUserWithOrg(Model model) throws FileNotFoundException, IOException {
+		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 	    String uaatoken =  getUaaToken();
 	    String orgName = "snow-test4";
