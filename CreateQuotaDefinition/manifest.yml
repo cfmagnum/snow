@@ -1,0 +1,6 @@
+---
+applications:
+- name: CreateQuotaDefinition
+  instances: 1
+  host: CreateQuotaDefinition
+  path: target/CreateQuotaDefinition-0.0.1-SNAPSHOT.jar

@@ -1,0 +1,6 @@
+---
+applications:
+- name: AssociateUserWithOrgApp
+  instances: 1
+  host: AssociateUserWithOrgApp
+  path: target/AssociateUserWithOrgApp-0.0.1-SNAPSHOT.jar

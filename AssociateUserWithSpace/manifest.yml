@@ -1,0 +1,6 @@
+---
+applications:
+- name: AssociateUserWithSpace
+  instances: 1
+  host: AssociateUserWithSpace
+  path: target/AssociateUserWithSpace-0.0.1-SNAPSHOT.jar

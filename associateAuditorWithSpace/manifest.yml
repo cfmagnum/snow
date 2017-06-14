@@ -2,5 +2,5 @@
 applications:
 - name: associateAuditorWithSpace
   instances: 1
-  host: FetchUserInformation
+  host: associateAuditorWithSpace
   path: target/associateAuditorWithSpace-0.0.1-SNAPSHOT.jar
