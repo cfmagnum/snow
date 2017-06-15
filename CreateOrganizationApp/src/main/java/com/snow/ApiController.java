@@ -31,12 +31,12 @@ public class ApiController {
 	@RequestMapping("/v1/create-organization")   
 	public ResponseEntity<String> Create_Organization(Model model) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
-
+		ClassLoader classLoader = getClass().getClassLoader();
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/x-www-form-urlencoded");
 	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
-	    String json = IOUtils.toString(new FileInputStream("C:\\workspace\\CreateOrganization\\CreateOrganizationApp\\src\\main\\resources\\organization_info.json"));
+		String json = IOUtils.toString(classLoader.getResourceAsStream("organization_info.json"));
 	    HttpEntity<String> httpEntity = new HttpEntity<>(json, headers);
 		return restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
 		
