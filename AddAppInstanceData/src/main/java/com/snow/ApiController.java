@@ -40,7 +40,7 @@ public class ApiController {
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
 	@RequestMapping(value="/v1/add-app-instance",method = RequestMethod.POST)   
-	public ResponseEntity<String> AddAppInstanceData(Model model, @RequestBody String json) throws FileNotFoundException, IOException{
+	public ResponseEntity<String> AddAppInstanceData(Model model, @RequestBody String json){
 		model.addAttribute("instanceInfo", instanceInfo);
 		ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);

@@ -2,7 +2,9 @@ package com.snow;
 
 
 
+import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -19,11 +21,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -35,16 +41,18 @@ public class ApiController {
 	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
 	   RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
-	@RequestMapping("/v1/delete-buildpack")   
-	public HttpStatus deleteBuildpack(Model model) {
+	@RequestMapping(value="/v1/delete-buildpack")   
+	public HttpStatus deleteBuildpack(Model model, @RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 	    String uaatoken =  getUaaToken();
-	   
-	    String buildpackName = "test1_buildpack";
+	    ObjectMapper mapper = new ObjectMapper();
+	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
+	    
+	    String buildpackName = (String) requestParams.get("name");
 	    String buildpackGuid = getBuildpackGuid(buildpackName);
 	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/buildpacks/" + buildpackGuid;
-	    System.out.println(url);
+	    
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/x-www-form-urlencoded");
 	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
