@@ -41,7 +41,7 @@ public class ApiController {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 	    String uaatoken =  getUaaToken();
 	   
-	    String buildpackName = "test";
+	    String buildpackName = "test1_buildpack";
 	    String buildpackGuid = getBuildpackGuid(buildpackName);
 	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/buildpacks/" + buildpackGuid;
 	    System.out.println(url);
