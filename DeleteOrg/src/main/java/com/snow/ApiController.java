@@ -45,7 +45,7 @@ public class ApiController {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> orgheaders = new LinkedMultiValueMap<String, String>();
 	    String uaatoken =  getUaaToken();
-	    String orgName = "snow-dele-test";
+	    String orgName = "snow-test4";
 	    String orgId= getOrgid(orgName);
 	    String urlfordelete= orgurl + "/" + orgId;
 	    orgheaders.add("Authorization", uaatoken);
