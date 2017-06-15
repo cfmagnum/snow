@@ -42,8 +42,10 @@ public class ApiController {
 	@RequestMapping(value="/v1/add-app-instance",method = RequestMethod.POST)   
 	public ResponseEntity<String> AddAppInstanceData(Model model, @RequestBody String json) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
-		
+		ObjectMapper mapper = new ObjectMapper();
+	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
+	    
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/json");
 	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
@@ -52,10 +54,7 @@ public class ApiController {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-	    ObjectMapper mapper = new ObjectMapper();
-	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
-	    
+		}  
 	    HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(requestParams, headers);
 		return restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
 		
