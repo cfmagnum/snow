@@ -32,18 +32,18 @@ public class ApiController {
 	   //private String uaaUrl = "http://localhost:8181/Snow-proxy/v2/Authorization";
 	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
 	   RestTemplate restTemplate = new RestTemplate();
-	 
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	   
 	@RequestMapping("/v1/add-build-pack")   
 	public ResponseEntity<String> Create_Quota_Definition(Model model) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
+		ClassLoader classLoader = getClass().getClassLoader();
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/json");
 	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
 	    
-	    String json = IOUtils.toString(new FileInputStream("C:\\workspace\\Add_Buildpack\\AddBuildpackApp\\src\\main\\resources\\BuildpackDetail.json"));
+	    String json = IOUtils.toString(classLoader.getResourceAsStream("BuildpackDetail.json"));
 	    HttpEntity<String> httpEntity = new HttpEntity<>(json, headers);
 	    try {
 			skipSslValidation(url);
