@@ -42,6 +42,7 @@ public class ApiController {
 	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
 	   RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
+	   
 	@RequestMapping(value="/v1/delete-buildpack", method = RequestMethod.POST)   
 	public HttpStatus deleteBuildpack(Model model, @RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);

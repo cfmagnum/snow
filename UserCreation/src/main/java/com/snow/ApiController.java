@@ -4,6 +4,7 @@ package com.snow;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -23,10 +24,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 public class ApiController {
@@ -36,17 +41,18 @@ public class ApiController {
 	   RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
-	@RequestMapping("/v1/create-user")   
-	public ResponseEntity<String> Create_User(Model model) throws FileNotFoundException, IOException{
+	@RequestMapping(value = "/v1/create-user" , method = RequestMethod.POST )   
+	public ResponseEntity<String> Create_User(Model model,@RequestBody String json) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
-		ClassLoader classLoader = getClass().getClassLoader();
+		
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/json");
 	    headers.add("Accept", "application/json");
-	    String json = IOUtils.toString(classLoader.getResourceAsStream("UserDetails.json"));
+	    ObjectMapper mapper = new ObjectMapper();
+	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 	    		
-	    HttpEntity<String> httpEntity = new HttpEntity<>(json, headers);
+	    HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(requestParams, headers);
 	    try {
 			skipSslValidation(url);
 		} catch (Exception e) {
