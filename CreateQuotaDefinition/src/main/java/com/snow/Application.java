@@ -9,10 +9,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @EnableAutoConfiguration
-public class CreateQuotaDefinitionApplication {
+public class Application {
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
-		SpringApplication.run(CreateQuotaDefinitionApplication.class, args);
+		SpringApplication.run(Application.class, args);
 		
 	}
 }
