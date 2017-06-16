@@ -56,7 +56,7 @@ public class ApiController {
 	    String uaatoken =  getUaaToken();
 	    ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
-	    String orgName = "snow-test4";
+	    String orgName = requestParams.get("name");
 	    String orgId= getOrgid(orgName);
 	    String urlfordelete= orgurl + "/" + orgId;
 	    orgheaders.add("Authorization", uaatoken);
@@ -73,10 +73,10 @@ public class ApiController {
 				return false;
 			}
 		});	
-	  //  HttpEntity<String> requestEntity = new HttpEntity<>("Headers", orgheaders);
-	    HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(requestParams, orgheaders);
+	    HttpEntity<String> requestEntity = new HttpEntity<>("Headers", orgheaders);
+	    //HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(requestParams, orgheaders);
 	    
-	    ResponseEntity<String> response = restTemplate.exchange(urlfordelete, HttpMethod.DELETE, httpEntity, String.class);
+	    ResponseEntity<String> response = restTemplate.exchange(urlfordelete, HttpMethod.DELETE, requestEntity, String.class);
 	    return response;		
 	}
 	public String getUaaToken(){

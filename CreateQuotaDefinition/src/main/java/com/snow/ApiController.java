@@ -40,13 +40,14 @@ public class ApiController {
 		
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
 	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", "application/json");
-
-	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+	    headers.add("Content-Type", "application/x-www-form-urlencoded");
+        headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
 	    ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
-		
+		System.out.println();
+		System.out.println(headers);
 	    HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(requestParams, headers);
+	    System.out.println(httpEntity);
 		return restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
 		
 	}
