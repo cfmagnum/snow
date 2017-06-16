@@ -1,7 +1,10 @@
 package com.snow;
 
 
+import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.Map;
+
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -18,11 +21,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -37,14 +45,16 @@ public class ApiController {
 	 
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	   
-	@RequestMapping("v1/associate-auditor-with-Org")   
-	public ResponseEntity<String> associateAuditorWithOrg(Model model) {
+	@RequestMapping(value = "v1/associate-auditor-with-Org" ,method = RequestMethod.POST)   
+	public ResponseEntity<String> associateAuditorWithOrg(Model model , @RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 	    String uaatoken =  getUaaToken();
-	    String orgName = "mayuri";
+	    ObjectMapper mapper = new ObjectMapper();
+	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
+	    String orgName = (String) requestParams.get("organizationName");
 	    String orgGuid= getOrgGuid(orgName);
-	    String userEmailId = "admin";
+	    String userEmailId = (String) requestParams.get("userEmailId");
 	    String uaaId= getUserUaaId(userEmailId);
 	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations/" + orgGuid + "/auditors/" + uaaId;
 	    headers.add("Authorization", uaatoken);
