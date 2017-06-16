@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
@@ -35,12 +37,14 @@ public class ApiController {
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	   
 	@RequestMapping(value="/v1/create-quota-definition", method = RequestMethod.POST)   
-	public ResponseEntity<String> Create_Quota_Definition(Model model, @RequestBody String json) throws FileNotFoundException, IOException{
+	public ResponseEntity<String> Create_Quota_Definition(Model model, @RequestBody String json) throws JsonParseException, JsonMappingException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
 		
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/json");
+
+	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
 	    ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 		
