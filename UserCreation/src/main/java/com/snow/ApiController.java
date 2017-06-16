@@ -44,8 +44,7 @@ public class ApiController {
 	@RequestMapping(value = "/v1/create-user" , method = RequestMethod.POST )   
 	public ResponseEntity<String> Create_User(Model model,@RequestBody String json) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
-		
-	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
+		String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/json");
 	    headers.add("Accept", "application/json");
