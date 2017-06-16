@@ -28,9 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ApiController {
 	   private String url ="http://api.sys.eu.cfdev.canopy-cloud.com/v2/quota_definitions";  
 	   private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-	  
-	   
-	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";   
+	  private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";   
 	   
 	   RestTemplate restTemplate = new RestTemplate();
 	 
@@ -42,7 +40,7 @@ public class ApiController {
 		
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
 	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", "application/x-www-form-urlencoded");
+	    headers.add("Content-Type", "application/json");
 
 	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
 	    ObjectMapper mapper = new ObjectMapper();
