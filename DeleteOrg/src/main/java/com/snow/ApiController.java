@@ -4,6 +4,8 @@ package com.snow;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.Map;
+
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -13,17 +15,24 @@ import javax.net.ssl.X509TrustManager;
 
 
 
+
+
+
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -40,11 +49,13 @@ public class ApiController {
 	   RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
-	@RequestMapping("/v1/delete-org")   
-	public ResponseEntity<String> DeleteOrg(Model model) throws FileNotFoundException, IOException{
+	@RequestMapping(value="/v1/delete-org", method = RequestMethod.POST)   
+	public ResponseEntity<String> DeleteOrg(Model model,@RequestBody String json) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> orgheaders = new LinkedMultiValueMap<String, String>();
 	    String uaatoken =  getUaaToken();
+	    ObjectMapper mapper = new ObjectMapper();
+	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 	    String orgName = "snow-test4";
 	    String orgId= getOrgid(orgName);
 	    String urlfordelete= orgurl + "/" + orgId;
@@ -62,9 +73,10 @@ public class ApiController {
 				return false;
 			}
 		});	
-	    HttpEntity<String> requestEntity = new HttpEntity<>("Headers", orgheaders);
+	  //  HttpEntity<String> requestEntity = new HttpEntity<>("Headers", orgheaders);
+	    HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(requestParams, orgheaders);
 	    
-	    ResponseEntity<String> response = restTemplate.exchange(urlfordelete, HttpMethod.DELETE, requestEntity, String.class);
+	    ResponseEntity<String> response = restTemplate.exchange(urlfordelete, HttpMethod.DELETE, httpEntity, String.class);
 	    return response;		
 	}
 	public String getUaaToken(){
