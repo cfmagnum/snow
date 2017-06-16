@@ -56,7 +56,7 @@ public class ApiController {
 	    String uaatoken =  getUaaToken();
 	    ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
-	    String orgName = requestParams.get("name");
+	    String orgName = (String) requestParams.get("name");
 	    String orgId= getOrgid(orgName);
 	    String urlfordelete= orgurl + "/" + orgId;
 	    orgheaders.add("Authorization", uaatoken);
