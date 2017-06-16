@@ -43,8 +43,10 @@ public class ApiController {
 	public ResponseEntity<String> AddBuildpack(Model model, @RequestBody String json) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
+	   
 	    ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
+	    
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/json");
 	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");

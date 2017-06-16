@@ -6,9 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @EnableAutoConfiguration
-public class CreateOrganizationAppApplication {
+public class Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(CreateOrganizationAppApplication.class, args);
+		SpringApplication.run(Application.class, args);
 	}
 }
