@@ -44,7 +44,7 @@ public class ApiController {
 		model.addAttribute("instanceInfo",instanceInfo);
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
 	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", "application/x-www-form-urlencoded");
+	    headers.add("Content-Type", "application/json");
 	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
 	   
 	    ObjectMapper mapper = new ObjectMapper();
