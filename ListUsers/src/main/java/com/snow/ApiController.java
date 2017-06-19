@@ -40,7 +40,7 @@ public class ApiController {
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
 	@RequestMapping(value="/v1/list-users", method = RequestMethod.GET)   
-	public ResponseEntity<String> getUsers(Model model,@RequestBody String json) throws FileNotFoundException, IOException{
+	public ResponseEntity<String> getUsers(Model model) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
 	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
 	    headers.add("Authorization", uaatoken);
