@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.net.ssl.TrustManager;
@@ -47,16 +48,25 @@ public class ApiController {
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
 	@RequestMapping(value= "/v1/update-quota-size-of-org", method = RequestMethod.POST)   
-	public ResponseEntity<String> associateUserWithOrg(Model model,@RequestBody String json) throws FileNotFoundException, IOException {
+	public ResponseEntity<String> updateQuotaSizeOfOrg(Model model,@RequestBody String json) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
+		System.out.println("inside method");
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 	    String uaatoken =  getUaaToken();
 	    String orgName = (String) requestParams.get("organizationName");
+	    System.out.println(orgName);
 	    String quota_definition_guid= getQuotaDefinitionGuid(orgName);
+	    
 	    Map<String,Object> uriVariables = new HashMap<String, Object>();
-	    uriVariables.put("", value);
+	    Iterator it = requestParams.entrySet().iterator();
+	    for(String key :requestParams.keySet()){
+	    	if(key!="organizationName"){
+	    		uriVariables.put(key,requestParams.get(key));
+	    	}
+	    }
+	    System.out.println(uriVariables);
 	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/quota_definitions/" + quota_definition_guid;
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/x-www-form-urlencoded");
@@ -72,11 +82,11 @@ public class ApiController {
 				return false;
 			}
 		});	
-	    String json = IOUtils.toString(new FileInputStream("./src/main/resources/QuotaUpdates.json"));
-	    HttpEntity<String> httpEntity = new HttpEntity<>(json, headers);
+	  //  String json = IOUtils.toString(new FileInputStream("./src/main/resources/QuotaUpdates.json"));
+	    HttpEntity<String> httpEntity = new HttpEntity<>("headers",headers);
 	    
 	    
-	    ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class);
+	    ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class, uriVariables);
 	    return response;		
 	}
 	

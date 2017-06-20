@@ -51,7 +51,7 @@ public class ApiController {
 	 
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	   
-	@RequestMapping(value = "/v1/associate-user-with-org", method = RequestMethod.POST)   
+	@RequestMapping(value = "/v1/associate-user-with-org", method = RequestMethod.POST) 
 	public ResponseEntity<String> associateUserWithOrg(Model model,@RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
