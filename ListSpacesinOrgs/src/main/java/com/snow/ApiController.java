@@ -2,7 +2,10 @@ package com.snow;
 
 
 
+import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.Map;
+
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -12,17 +15,26 @@ import javax.net.ssl.X509TrustManager;
 
 
 
+
+
+
+
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -39,18 +51,26 @@ public class ApiController {
 	   RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
-	@RequestMapping("/v1/list-spaces")   
-	public ResponseEntity<String> associateUserWithOrg(Model model) {
+	@RequestMapping(value="/v1/list-spaces")   
+	public ResponseEntity<String> associateUserWithOrg(Model model,@RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 	    String uaatoken =  getUaaToken();
-	    String orgName = "snow-test4";
+	   
+	    ObjectMapper mapper = new ObjectMapper();
+	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
+
+ 		
+	    HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(requestParams, headers);
+	    String orgName = (String) requestParams.get("organizationName");
 	    String orgGuid= getOrgGuid(orgName);
 	    
 	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations/" + orgGuid + "/spaces";
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/x-www-form-urlencoded");
 	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+	    
+	   
 	    try {
 			skipSslValidation(url);
 		} catch (Exception e) {
