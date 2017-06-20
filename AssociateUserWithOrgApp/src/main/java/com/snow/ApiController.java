@@ -119,7 +119,7 @@ public class ApiController {
 		    if(job.getAsJsonArray("resources")!=null){
 		    	resources=job.getAsJsonArray("resources").get(0).getAsJsonObject();
 		    }		
-		    System.out.println(resources);
+		    
 		    JsonObject metadata =resources.get("metadata").getAsJsonObject();
 		    guid = metadata.get("guid").getAsString();
 	    }
