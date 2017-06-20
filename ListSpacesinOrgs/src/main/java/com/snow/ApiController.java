@@ -20,6 +20,7 @@ import javax.net.ssl.X509TrustManager;
 
 
 
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
@@ -51,19 +53,21 @@ public class ApiController {
 	   RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
-	@RequestMapping(value="/v1/list-spaces")   
+	@RequestMapping(value="/v1/list-spaces" , method = RequestMethod.POST )  
 	public ResponseEntity<String> associateUserWithOrg(Model model,@RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 	    String uaatoken =  getUaaToken();
-	   
+	 
 	    ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 
  		
 	    HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(requestParams, headers);
+	    
 	    String orgName = (String) requestParams.get("organizationName");
 	    String orgGuid= getOrgGuid(orgName);
+	    System.out.println(orgGuid);
 	    
 	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations/" + orgGuid + "/spaces";
 	    headers.add("Authorization", uaatoken);
