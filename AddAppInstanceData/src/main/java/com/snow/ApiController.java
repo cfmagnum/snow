@@ -14,7 +14,6 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.io.IOUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
 import org.springframework.ui.Model;
@@ -29,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
@@ -40,7 +41,7 @@ public class ApiController {
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
 	@RequestMapping(value="/v1/add-app-instance",method = RequestMethod.POST)   
-	public ResponseEntity<String> AddAppInstanceData(Model model, @RequestBody String json){
+	public ResponseEntity<String> AddAppInstanceData(Model model, @RequestBody String json) throws JsonParseException, JsonMappingException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
 		ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
