@@ -1,0 +1,6 @@
+---
+applications:
+- name: DeleteUser
+  instances: 1
+  host: DeleteUser
+  path: target/DeleteUser-0.0.1-SNAPSHOT.jar
