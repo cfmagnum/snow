@@ -50,7 +50,7 @@ public class ApiController {
 		model.addAttribute("instanceInfo", instanceInfo);
 		String uaatoken =  getUaaToken();
 		
-		url = "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users" + "";
+		
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/json");
 	    headers.add("Accept", "application/json");
@@ -58,6 +58,7 @@ public class ApiController {
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 	    String userEmailId = (String) requestParams.get("userEmailId");	
 	    String uaaId = getUserUaaId(userEmailId);
+	    url = "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users/" + uaaId;
 	    HttpEntity<String> httpEntity = new HttpEntity<>("Headers", headers);
 	    try {
 			skipSslValidation(url);
