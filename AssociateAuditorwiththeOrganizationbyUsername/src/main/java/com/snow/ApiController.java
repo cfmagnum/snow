@@ -46,8 +46,8 @@ public class ApiController {
 	 
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	   
-	@RequestMapping(value = "v1/associate_auditor_with_the_organization_by_username" ,method = RequestMethod.POST)   
-	public ResponseEntity<String> associateAuditorwiththeOrganizationbyUsername(Model model , @RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
+	@RequestMapping(value = "v1/associate_auditor_with_the_org_by_username" ,method = RequestMethod.POST)   
+	public ResponseEntity<String> associateAuditorwiththeOrgbyUsername(Model model , @RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
 		
 		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");

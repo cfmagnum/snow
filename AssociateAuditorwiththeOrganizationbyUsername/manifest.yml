@@ -1,6 +1,6 @@
 ---
 applications:
-- name: associateAuditorwiththeOrganizationbyUsername
+- name: associateAuditorwiththeOrgbyUsername
   instances: 1
-  host: associateAuditorwiththeOrganizationbyUsername
-  path: target/associateAuditorwiththeOrganizationbyUsername-0.0.1-SNAPSHOT.jar
+  host: associateAuditorwiththeOrgbyUsername
+  path: target/associateAuditorwiththeOrgbyUsername-0.0.1-SNAPSHOT.jar
