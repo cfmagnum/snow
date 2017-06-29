@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.TrustManager;
@@ -43,34 +44,33 @@ import com.google.gson.JsonSyntaxException;
 @RestController
 public class ApiController {
 	  // private String orgurl ="https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations";  
-	   private String uaaUrl = "http://snow-host.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
+	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
 	   RestTemplate restTemplate = new RestTemplate();
+	   private Gson gson = new Gson(); 
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
 	@RequestMapping(value= "/v1/update-quota-size-of-org", method = RequestMethod.POST)   
 	public ResponseEntity<String> updateQuotaSizeOfOrg(Model model,@RequestBody String json) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		System.out.println("inside method");
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		//Map<String, Object> uriVariables = new Hashmap<String, Object>();
+		String orgName ="";
+		String uaatoken="";
+		String quota_definition_guid="";
+		String url = "";
 		ObjectMapper mapper = new ObjectMapper();
-	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
-	    String uaatoken =  getUaaToken();
-	    String orgName = (String) requestParams.get("organizationName");
-	    System.out.println(orgName);
-	    String quota_definition_guid= getQuotaDefinitionGuid(orgName);
+		Map<String, Object> params = new HashMap<String, Object>();
+		Map<String,Object> requestParams = mapper.readValue(json, Map.class);
+	    uaatoken =  getUaaToken();
+		orgName = (String) requestParams.get("organizationName");
+	    quota_definition_guid= getQuotaDefinitionGuid(orgName);
+	   
 	    
-	    Map<String,Object> uriVariables = new HashMap<String, Object>();
-	    Iterator it = requestParams.entrySet().iterator();
-	    for(String key :requestParams.keySet()){
-	    	if(key!="organizationName"){
-	    		uriVariables.put(key,requestParams.get(key));
-	    	}
-	    }
-	    System.out.println(uriVariables);
-	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/quota_definitions/" + quota_definition_guid;
+	    url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/quota_definitions/" + quota_definition_guid;
 	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", "application/x-www-form-urlencoded");
+	    headers.add("Content-Type", "application/json");
 	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+	   
 	    try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -82,11 +82,18 @@ public class ApiController {
 				return false;
 			}
 		});	
-	  //  String json = IOUtils.toString(new FileInputStream("./src/main/resources/QuotaUpdates.json"));
-	    HttpEntity<String> httpEntity = new HttpEntity<>("headers",headers);
 	    
+	    for(String key :requestParams.keySet()){
+	    	if(key!="organizationName"){
+	    		params.put(key, requestParams.get(key));
+	    	}
+	    }
+	    System.out.println(params);
+	    String jsonData = gson.toJson(params);
+	    HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
 	    
-	    ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, String.class, uriVariables);
+	   // System.out.println(params);
+	    ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
 	    return response;		
 	}
 	
