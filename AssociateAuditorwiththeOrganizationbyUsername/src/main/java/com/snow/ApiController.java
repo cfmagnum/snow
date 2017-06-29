@@ -3,6 +3,7 @@ package com.snow;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.ssl.TrustManager;
@@ -61,12 +62,14 @@ public class ApiController {
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 	    String orgName = (String) requestParams.get("organizationName");
 	    String orgGuid= getOrgGuid(orgName);
-	    String userEmailId = (String) requestParams.get("userEmailId");
-	    String uaaId= getUserUaaId(userEmailId);
-	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations/" + orgGuid + "/auditors/" + uaaId;
+	    String userName = (String) requestParams.get("username");
+	    
+	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations/" + orgGuid + "/auditors";
+	    
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/x-www-form-urlencoded");
 	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+	    
 	    try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -78,8 +81,16 @@ public class ApiController {
 				return false;
 			}
 		});	
-	    HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-	    
+
+	    Map<String, String> params = new HashMap<String, String>();
+		 //params.put("organizationName", orgName);
+		 params.put("username", userName);
+		 
+		 Gson gson = new Gson(); 
+		 String jsonData = gson.toJson(params);
+		 
+		 HttpEntity<String> requestEntity = new HttpEntity<>(jsonData,headers);
+					  
 	    ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
 	    return response;		
 	}
