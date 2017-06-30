@@ -46,8 +46,8 @@ public class ApiController {
 	 
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	   
-	@RequestMapping(value = "v1/associate_manager_with_the_org_by_username" ,method = RequestMethod.POST)   
-	public ResponseEntity<String> associateManagerwiththeOrgbyUsername(Model model , @RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
+	@RequestMapping(value = "v1/associate_billing_manager_with_the_organization_by_username" ,method = RequestMethod.POST)   
+	public ResponseEntity<String> associateBillingManagerwiththeOrgbyUsername(Model model , @RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
 		
 		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
@@ -64,7 +64,7 @@ public class ApiController {
 	    String orgGuid= getOrgGuid(orgName);
 	    String userName = (String) requestParams.get("username");
 	    
-	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations/" + orgGuid + "/managers";
+	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations/" + orgGuid + "/billing_managers";
 	    
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/x-www-form-urlencoded");
