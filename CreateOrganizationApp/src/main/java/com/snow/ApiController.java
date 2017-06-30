@@ -44,8 +44,6 @@ public class ApiController {
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/json");
 	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
-	    
-	    System.out.println(headers);
 		
 	    HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(requestParams, headers);
 	    System.out.println(httpEntity);
