@@ -129,7 +129,7 @@ public class ApiController {
 	}
 	public String getSpaceGuid(String orgGuid, String spaceGuid){
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations/" + orgGuid + "/spaces" + "?q=name:" + spaceName;	
+		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations/" + orgGuid + "/spaces" + "?q=name:" + spaceGuid;	
 	    String uaatoken =  getUaaToken();
 	    String guid="";
 	    JsonObject resources = new JsonObject();
