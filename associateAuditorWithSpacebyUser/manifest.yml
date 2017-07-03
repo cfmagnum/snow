@@ -1,0 +1,6 @@
+---
+applications:
+- name: associateAuditorWithSpaceByUsername
+  instances: 1
+  host: associateAuditorWithSpaceByUsername
+  path: target/associateAuditorWithSpaceByUsername-0.0.1-SNAPSHOT.jar
