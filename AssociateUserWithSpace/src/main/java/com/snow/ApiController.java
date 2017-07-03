@@ -62,7 +62,7 @@ public class ApiController {
 	    String spaceName = (String) requestParams.get("spaceName");
 	    String userEmailId = (String) requestParams.get("userEmailId");
 	    String spaceGuid=getSpaceGuid(orgName,spaceName);
-	   
+	   System.out.println(orgName);
 	    String uaaId= getUserUaaId(userEmailId);
 	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/users/" + uaaId + "/spaces/" + spaceGuid;
 	    headers.add("Authorization", uaatoken);
