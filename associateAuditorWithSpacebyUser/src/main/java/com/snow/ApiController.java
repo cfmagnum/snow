@@ -51,14 +51,17 @@ public class ApiController {
 	@RequestMapping(value = "v1/associate-auditor-with-space-by-username", method = RequestMethod.POST)   
 	public ResponseEntity<String> associateAuditorWithSpaceByUsername(Model model, @RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
+	
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 	    String uaatoken =  getUaaToken();
+	    
 	    ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
+	    
 	    String orgName = (String) requestParams.get("organizationName");
 	    String orgGuid= getOrgGuid(orgName);
 	    String spaceName = (String) requestParams.get("spaceName");
-	    String userEmailId =(String) requestParams.get("userEmailId");
+	   // String userEmailId =(String) requestParams.get("userEmailId");
 	    String spaceGuid = getSpaceGuid(orgGuid, spaceName);
 	    String userName = (String) requestParams.get("username");
 	    
