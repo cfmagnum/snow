@@ -1,0 +1,6 @@
+---
+applications:
+- name: associateDeveloperWithSpaceByUsername
+  instances: 1
+  host: associateDeveloperWithSpaceByUsername
+  path: target/associateDeveloperWithSpaceByUsername-0.0.1-SNAPSHOT.jar

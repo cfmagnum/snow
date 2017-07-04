@@ -4,6 +4,7 @@ package com.snow;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.ssl.TrustManager;
@@ -48,30 +49,32 @@ public class ApiController {
 	 
 	 @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	
-	@RequestMapping(value = "v1/associate-auditor-with-space", method = RequestMethod.POST)   
-	public ResponseEntity<String> associateUserWithSpace(Model model, @RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
+	@RequestMapping(value = "v1/associate-developer-with-space-by-username", method = RequestMethod.POST)   
+	public ResponseEntity<String> associateDeveloperWithSpaceByUsername(Model model, @RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		
 		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
         System.getProperties().put("http.proxyPort","84"); 
         System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
-        System.getProperties().put("https.proxyPort","84");  
-        
+        System.getProperties().put("https.proxyPort","84");
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 	    String uaatoken =  getUaaToken();
 	    ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 	    String orgName = (String) requestParams.get("organizationName");
-	    
 	    String orgGuid= getOrgGuid(orgName);
 	    String spaceName = (String) requestParams.get("spaceName");
-	    String userEmailId =(String) requestParams.get("userEmailId");
+	   // String userEmailId =(String) requestParams.get("userEmailId");
 	    String spaceGuid = getSpaceGuid(orgGuid, spaceName);
-	    String uaaId= getUserUaaId(userEmailId);
+	    String username = (String) requestParams.get("username");
 	    
-	    System.out.println(orgGuid+userEmailId);
+	    Gson gson = new Gson(); 
+		 
+	    Map<String, String> params = new HashMap<String, String>();
+	    params.put("username", username);
 	    
-	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/spaces/" + spaceGuid + "/auditors/" + uaaId;
+	    System.out.println(username+spaceName);
+	    
+	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/spaces/" + spaceGuid + "/developers";
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/x-www-form-urlencoded");
 	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
@@ -86,7 +89,8 @@ public class ApiController {
 				return false;
 			}
 		});	
-	    HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
+	    String jsonData = gson.toJson(params);
+	    HttpEntity<String> requestEntity = new HttpEntity<>(jsonData,headers);
 	    System.out.println(url);
 	    ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
 	    return response;		
@@ -104,7 +108,7 @@ public class ApiController {
 		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
         System.getProperties().put("http.proxyPort","84"); 
         System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
-        System.getProperties().put("https.proxyPort","84");  
+        System.getProperties().put("https.proxyPort","84");
 		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:" + orgName;	
 	    String uaatoken =  getUaaToken();
 	    String guid="";
@@ -143,7 +147,7 @@ public class ApiController {
 		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
         System.getProperties().put("http.proxyPort","84"); 
         System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
-        System.getProperties().put("https.proxyPort","84");  
+        System.getProperties().put("https.proxyPort","84");
 		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations/" + orgGuid + "/spaces" + "?q=name:" + spaceName;	
 	    String uaatoken =  getUaaToken();
 	    String guid="";
