@@ -4,6 +4,7 @@ package com.snow;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
@@ -51,7 +52,10 @@ public class ApiController {
 	public ResponseEntity<String> associateUserWithSpace(Model model,@RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-	 
+		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
+        System.getProperties().put("http.proxyPort","84"); 
+        System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
+        System.getProperties().put("https.proxyPort","84");  
 		String uaatoken =  getUaaToken();
 		
 	    ObjectMapper mapper = new ObjectMapper();
@@ -61,9 +65,17 @@ public class ApiController {
 	    String orgGuid= getOrgGuid(orgName);
 	    String spaceName = (String) requestParams.get("spaceName");
 	    String userEmailId = (String) requestParams.get("userEmailId");
-	    String spaceGuid=getSpaceGuid(orgName,spaceName);
-	   System.out.println(orgName);
+	    
+	    Gson gson = new Gson(); 
+	 
+	    Map<String, String> params = new HashMap<String, String>();
+	    params.put("userEmailId", userEmailId);
+	    
+	    String spaceGuid=getSpaceGuid(orgGuid,spaceName);
+	   
+	  
 	    String uaaId= getUserUaaId(userEmailId);
+	
 	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/users/" + uaaId + "/spaces/" + spaceGuid;
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", "application/x-www-form-urlencoded");
@@ -79,10 +91,18 @@ public class ApiController {
 				return false;
 			}
 		});	
-	    HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
+	    String jsonData = gson.toJson(params);
+	    HttpEntity<String> requestEntity = new HttpEntity<>(jsonData,headers);
+	    
+	    
+         System.out.println(requestEntity);
+	    
+	    System.out.println(url);
 	    
 	    ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
-	    return response;		
+	    return response;	
+	    
+ 
 	}
 	
 	
@@ -93,6 +113,10 @@ public class ApiController {
 	
 	
 	public String getOrgGuid(String orgName){
+		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
+        System.getProperties().put("http.proxyPort","84"); 
+        System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
+        System.getProperties().put("https.proxyPort","84");  
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:" + orgName;	
 	    String uaatoken =  getUaaToken();
@@ -127,9 +151,14 @@ public class ApiController {
 	    }
 	   return guid;		
 	}
-	public String getSpaceGuid(String orgGuid, String spaceGuid){
+	public String getSpaceGuid(String orgGuid, String spaceName){
+		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
+        System.getProperties().put("http.proxyPort","84"); 
+        System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
+        System.getProperties().put("https.proxyPort","84");  
+		
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations/" + orgGuid + "/spaces" + "?q=name:" + spaceGuid;	
+		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations/" + orgGuid + "/spaces" + "?q=name:" + spaceName;	
 	    String uaatoken =  getUaaToken();
 	    String guid="";
 	    JsonObject resources = new JsonObject();
