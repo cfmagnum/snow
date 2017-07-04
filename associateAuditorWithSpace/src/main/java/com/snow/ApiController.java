@@ -62,7 +62,7 @@ public class ApiController {
 	    ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 	    String orgName = (String) requestParams.get("organizationName");
-	    
+	    System.out.println(orgName);
 	    String orgGuid= getOrgGuid(orgName);
 	    String spaceName = (String) requestParams.get("spaceName");
 	    String userEmailId =(String) requestParams.get("userEmailId");

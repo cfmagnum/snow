@@ -18,6 +18,9 @@ import javax.net.ssl.X509TrustManager;
 
 
 
+
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
 import org.springframework.http.HttpEntity;
@@ -54,12 +57,19 @@ public class ApiController {
 	@RequestMapping(value = "/v1/associate-user-with-org", method = RequestMethod.POST) 
 	public ResponseEntity<String> associateUserWithOrg(Model model,@RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
+		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
+        System.getProperties().put("http.proxyPort","84"); 
+        System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
+        System.getProperties().put("https.proxyPort","84");  
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 	    String uaatoken =  getUaaToken();
 	    String orgName = (String) requestParams.get("organizationName");
 	    String orgGuid= getOrgGuid(orgName);
+	    
+	   
+	    
 	    String userEmailId = (String) requestParams.get("userEmailId");
 	    String uaaId= getUserUaaId(userEmailId);
 	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/users/" + uaaId + "/organizations/" + orgGuid;
@@ -78,7 +88,7 @@ public class ApiController {
 			}
 		});	
 	    HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-	    
+	    System.out.println(orgName+orgGuid+userEmailId+url);
 	    ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
 	    return response;		
 	}
@@ -92,6 +102,10 @@ public class ApiController {
 	
 	public String getOrgGuid(String orgName){
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
+        System.getProperties().put("http.proxyPort","84"); 
+        System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
+        System.getProperties().put("https.proxyPort","84");  
 		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:" + orgName;	
 	    String uaatoken =  getUaaToken();
 	    String guid="";
