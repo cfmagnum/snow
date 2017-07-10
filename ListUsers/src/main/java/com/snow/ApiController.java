@@ -29,22 +29,31 @@ import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.core.env.Environment;
 import org.springframework.ui.Model;
 
 @RestController
 public class ApiController {
+	@Autowired
+	Environment env;
 	   private String url ="https://uaa.sys.eu.cfdev.canopy-cloud.com/Users";  
 	   private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
+	 
 	   RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
 	@RequestMapping(value="/v1/list-users", method = RequestMethod.GET)   
 	public ResponseEntity<String> getUsers(Model model) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
-	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
+		
+		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("http.proxyPort","84"); 
+		System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("https.proxyPort","84");
+		
+	    String uaatoken =  restTemplate.getForObject(env.getProperty("uaaUrl"), String.class);
 	    headers.add("Authorization", uaatoken);
-	    headers.add("Accept", "application/json");
+	    headers.add("Accept", env.getProperty("Content-Type-json"));
 	    HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
 	    try {
 			skipSslValidation(url);
