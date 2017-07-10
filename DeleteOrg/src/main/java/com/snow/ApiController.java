@@ -12,6 +12,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.X509TrustManager;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -33,12 +34,16 @@ import com.google.gson.JsonSyntaxException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.core.env.Environment;
 import org.springframework.ui.Model;
 
 @RestController
 public class ApiController {
-	   private String orgurl ="https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations";  
-	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
+	@Autowired
+	Environment env; 
+	
+	private String orgurl ="https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations";  
+	   
 	   RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
@@ -53,8 +58,8 @@ public class ApiController {
 	    String orgId= getOrgid(orgName);
 	    String urlfordelete= orgurl + "/" + orgId;
 	    orgheaders.add("Authorization", uaatoken);
-	    orgheaders.add("Content-Type", "application/json");
-	    orgheaders.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+	    orgheaders.add("Content-Type",env.getProperty("Content-Type-json") );
+	    orgheaders.add("Host", env.getProperty("Host"));
 	    try {
 			skipSslValidation(orgurl);
 		} catch (Exception e) {
@@ -73,7 +78,7 @@ public class ApiController {
 	    return response;		
 	}
 	public String getUaaToken(){
-		 String token =  restTemplate.getForObject(uaaUrl, String.class);
+		String token =  restTemplate.getForObject(env.getProperty("uaaUrl"), String.class);
 		 return token;
 	}
 	public String getOrgid(String orgName){
