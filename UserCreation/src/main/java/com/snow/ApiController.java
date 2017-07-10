@@ -11,12 +11,12 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
-
 import javax.net.ssl.X509TrustManager;
-import org.apache.commons.io.IOUtils;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.core.env.Environment;
 import org.springframework.ui.Model;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -35,19 +35,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 public class ApiController {
+	@Autowired
+	Environment env;
 	   private String url ="https://uaa.sys.eu.cfdev.canopy-cloud.com/Users";  
 	   private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
+	  
 	   RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
 	@RequestMapping(value = "/v1/create-user" , method = RequestMethod.POST )   
 	public ResponseEntity<String> Create_User(Model model,@RequestBody String json) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
-		String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
+		String uaatoken =  restTemplate.getForObject(env.getProperty("uaaUrl"), String.class);
 	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", "application/json");
-	    headers.add("Accept", "application/json");
+	    headers.add("Content-Type", env.getProperty("Content-Type-json"));
+	    headers.add("Accept", env.getProperty("Host"));
 	    ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 	    		
