@@ -15,6 +15,7 @@ import javax.net.ssl.X509TrustManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -38,8 +39,9 @@ import com.google.gson.JsonSyntaxException;
 
 @RestController
 public class ApiController {
-	  // private String orgurl ="https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations";  
-	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
+	@Autowired
+	Environment env;
+	
 	   RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	   
@@ -47,6 +49,12 @@ public class ApiController {
 	public HttpStatus deleteBuildpack(Model model, @RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		
+		    System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
+			System.getProperties().put("http.proxyPort","84"); 
+			System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
+			System.getProperties().put("https.proxyPort","84");
+		
 	    String uaatoken =  getUaaToken();
 	    ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
@@ -56,8 +64,8 @@ public class ApiController {
 	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/buildpacks/" + buildpackGuid;
 	    
 	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", "application/x-www-form-urlencoded");
-	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+	    headers.add("Content-Type", env.getProperty("Content-Type-json"));
+	    headers.add("Host", env.getProperty("Host"));
 	    try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -78,7 +86,7 @@ public class ApiController {
 	
 	
 	public String getUaaToken(){
-		 String token =  restTemplate.getForObject(uaaUrl, String.class);
+		 String token =  restTemplate.getForObject(env.getProperty("uaaUrl"), String.class);
 		 return token;
 	}
 	
