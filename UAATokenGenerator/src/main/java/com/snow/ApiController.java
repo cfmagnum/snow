@@ -1,8 +1,10 @@
 package com.snow;
 
+
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -13,6 +15,7 @@ import javax.net.ssl.X509TrustManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -27,7 +30,9 @@ import org.springframework.web.client.RestTemplate;
 
 @RestController
 public class ApiController {
-   
+   @Autowired
+	Environment env;
+	
    private String url = "https://login.sys.eu.cfdev.canopy-cloud.com/oauth/token";
    private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
    private Map<String, Object> token = new HashMap<String, Object>();
@@ -39,11 +44,10 @@ public class ApiController {
    @RequestMapping("/v1/get-UAA-token")
    public String getAuthorizationToken(Model model) {
 	   model.addAttribute("instanceInfo", instanceInfo);
-	    headers.add("Authorization", "Basic Y2Y6");
-	    headers.add("cache-control", "no-cache");
-	    headers.add("Content-Type", "application/x-www-form-urlencoded");
-	    headers.add("x-uaa-endpoint", "uaa.sys.eu.cfdev.canopy-cloud.com");
-	    headers.add("accept", "application/json");
+	    headers.add("cache-control",env.getProperty("cache-control"));
+	    headers.add("Content-Type", env.getProperty("Content-Type"));
+	    headers.add("x-uaa-endpoint", env.getProperty("UAA"));
+	    headers.add("accept", env.getProperty("Content-Type-json"));
 	    headers.add("charset", "utf-8");
 	    restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
 			protected boolean hasError(HttpStatus statusCode) {
@@ -65,6 +69,7 @@ public class ApiController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	 
 	 
 	   
 	    JacksonJsonParser parser = new JacksonJsonParser();
