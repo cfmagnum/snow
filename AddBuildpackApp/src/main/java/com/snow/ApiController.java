@@ -16,6 +16,7 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -32,24 +33,31 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 public class ApiController {
+	@Autowired
+	Environment env;
 	   private String url ="https://api.sys.eu.cfdev.canopy-cloud.com/v2/buildpacks";  
 	   private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 	   
-	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
+	   
 	   RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	   
 	@RequestMapping(value = "/v1/add-build-pack" ,method = RequestMethod.POST)   
 	public ResponseEntity<String> AddBuildpack(Model model, @RequestBody String json) throws FileNotFoundException, IOException{
 		model.addAttribute("instanceInfo", instanceInfo);
-	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
+		 System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
+			System.getProperties().put("http.proxyPort","84"); 
+			System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
+			System.getProperties().put("https.proxyPort","84");
+		
+	    String uaatoken =  restTemplate.getForObject(env.getProperty("uaaUrl"), String.class);
 	   
 	    ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 	    
 	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", "application/json");
-	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+	    headers.add("Content-Type",  env.getProperty("Content-Type-json"));
+	    headers.add("Host", env.getProperty("Host"));
 	    
 	    
 	    HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(requestParams, headers);
