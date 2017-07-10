@@ -1,6 +1,5 @@
 package com.snow;
 
-
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,9 +29,9 @@ import org.springframework.web.client.RestTemplate;
 
 @RestController
 public class ApiController {
-   @Autowired
+	@Autowired
 	Environment env;
-	
+   
    private String url = "https://login.sys.eu.cfdev.canopy-cloud.com/oauth/token";
    private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
    private Map<String, Object> token = new HashMap<String, Object>();
@@ -43,7 +42,14 @@ public class ApiController {
    
    @RequestMapping("/v1/get-UAA-token")
    public String getAuthorizationToken(Model model) {
+	   
+	   System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("http.proxyPort","84");
+		System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("https.proxyPort","84");
+		
 	   model.addAttribute("instanceInfo", instanceInfo);
+	    headers.add("Authorization", "Basic Y2Y6");
 	    headers.add("cache-control",env.getProperty("cache-control"));
 	    headers.add("Content-Type", env.getProperty("Content-Type"));
 	    headers.add("x-uaa-endpoint", env.getProperty("UAA"));
@@ -55,13 +61,7 @@ public class ApiController {
 			}
 		});	
 	  
-	   /* HttpTransportProperties.ProxyProperties proxyProperties = new HttpTransportProperties.ProxyProperties();
-	    proxyProperties.setDomain("ww930");
-	    proxyProperties.setProxyName("proxy-de.glb.my-it-solutions.net");
-	    proxyProperties.setProxyPort(84);
-	    configurationContext.setProperty(HTTPConstants.PROXY, proxyProperties);
-	    */
-	    
+	  	    
 	    HttpEntity<String> httpEntity = new HttpEntity<>(json, headers);
 	    try {
 			skipSslValidation(url);
@@ -69,7 +69,6 @@ public class ApiController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	 
 	 
 	   
 	    JacksonJsonParser parser = new JacksonJsonParser();
