@@ -11,12 +11,12 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
-
 import javax.net.ssl.X509TrustManager;
-import org.apache.commons.io.IOUtils;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.core.env.Environment;
 import org.springframework.ui.Model;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -39,9 +39,11 @@ import com.google.gson.JsonSyntaxException;
 
 @RestController
 public class ApiController {
+	@Autowired
+	Environment env;
+	
 	   private String url ="";  
 	   private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
 	   RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
@@ -52,8 +54,8 @@ public class ApiController {
 		
 		
 	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", "application/json");
-	    headers.add("Accept", "application/json");
+	    headers.add("Content-Type", env.getProperty("Content-Type-json"));
+	    headers.add("Accept", env.getProperty("Host"));
 	    ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 	    String userEmailId = (String) requestParams.get("userEmailId");	
@@ -105,7 +107,7 @@ public class ApiController {
 		
    }
 	public String getUaaToken(){
-		 String token =  restTemplate.getForObject(uaaUrl, String.class);
+		String token =  restTemplate.getForObject(env.getProperty("uaaUrl"), String.class);
 		 return token;
 	}
 	
