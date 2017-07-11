@@ -21,8 +21,10 @@ import javax.net.ssl.X509TrustManager;
 
 
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -47,9 +49,8 @@ import com.google.gson.JsonSyntaxException;
 
 @RestController
 public class ApiController {
-	  // private String orgurl ="https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations";  
-	 //  private String uaaUrl = "http://localhost:8181/Snow-proxy/v2/Authorization";
-	 private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
+	@Autowired
+	Environment env;
 	   RestTemplate restTemplate = new RestTemplate();
 	 
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
@@ -57,25 +58,25 @@ public class ApiController {
 	@RequestMapping(value = "/v1/associate-user-with-org", method = RequestMethod.POST) 
 	public ResponseEntity<String> associateUserWithOrg(Model model,@RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
+		
 		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
         System.getProperties().put("http.proxyPort","84"); 
         System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
-        System.getProperties().put("https.proxyPort","84");  
+        System.getProperties().put("https.proxyPort","84");
+        
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		ObjectMapper mapper = new ObjectMapper();
 	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 	    String uaatoken =  getUaaToken();
 	    String orgName = (String) requestParams.get("organizationName");
 	    String orgGuid= getOrgGuid(orgName);
-	    
-	   
-	    
 	    String userEmailId = (String) requestParams.get("userEmailId");
 	    String uaaId= getUserUaaId(userEmailId);
 	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/users/" + uaaId + "/organizations/" + orgGuid;
+	   
 	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", "application/x-www-form-urlencoded");
-	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+	    headers.add("Content-Type", env.getProperty("Content-Type-json"));
+	    headers.add("Accept", env.getProperty("Host"));
 	    try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -95,7 +96,7 @@ public class ApiController {
 	
 	
 	public String getUaaToken(){
-		 String token =  restTemplate.getForObject(uaaUrl, String.class);
+		 String token =  restTemplate.getForObject(env.getProperty("UaaUrl"), String.class);
 		 return token;
 	}
 	
