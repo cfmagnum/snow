@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +25,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 public class ApiController {
+	
+	@Autowired
+	Environment env;
+	
 	   private String url ="http://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations";  
 	   private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 	   //private String uaaUrl = "http://localhost:8181/Snow-proxy/v2/Authorization";
-	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";   
+	    
 	   
 	   RestTemplate restTemplate = new RestTemplate();
 	 
@@ -40,10 +45,10 @@ public class ApiController {
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 		 System.out.println(requestParams);
-	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
+	    String uaatoken =  restTemplate.getForObject(env.getProperty("uaaUrl"), String.class);
 	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", "application/json");
-	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+	    headers.add("Content-Type", env.getProperty("Content-Type-json"));
+	    headers.add("Accept", env.getProperty("Host"));
 		
 	    HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(requestParams, headers);
 	    System.out.println(httpEntity);
