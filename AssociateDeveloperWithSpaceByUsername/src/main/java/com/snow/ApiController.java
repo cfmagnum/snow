@@ -16,6 +16,7 @@ import javax.net.ssl.X509TrustManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -40,22 +41,22 @@ import com.google.gson.JsonSyntaxException;
 
 @RestController
 public class ApiController {
-	  // private String orgurl ="https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations";  
-	  // private String uaaUrl = "http://localhost:8181/Snow-proxy/v2/Authorization";
-	
-	
-	 private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";   
-	RestTemplate restTemplate = new RestTemplate();
+	@Autowired
+	Environment env;
+	   
+	 RestTemplate restTemplate = new RestTemplate();
 	 
 	 @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	
 	@RequestMapping(value = "v1/associate-developer-with-space-by-username", method = RequestMethod.POST)   
 	public ResponseEntity<String> associateDeveloperWithSpaceByUsername(Model model, @RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
+		
 		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
         System.getProperties().put("http.proxyPort","84"); 
         System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
         System.getProperties().put("https.proxyPort","84");
+        
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 	    String uaatoken =  getUaaToken();
 	    ObjectMapper mapper = new ObjectMapper();
@@ -76,8 +77,8 @@ public class ApiController {
 	    
 	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/spaces/" + spaceGuid + "/developers";
 	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", "application/x-www-form-urlencoded");
-	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+	    headers.add("Content-Type", env.getProperty("Content-Type-json"));
+	    headers.add("Accept", env.getProperty("Host"));
 	    try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -98,7 +99,7 @@ public class ApiController {
 	
 	
 	public String getUaaToken(){
-		 String token =  restTemplate.getForObject(uaaUrl, String.class);
+		 String token =  restTemplate.getForObject(env.getProperty("uaaUrl"), String.class);
 		 return token;
 	}
 	
