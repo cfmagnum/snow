@@ -17,6 +17,7 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -41,9 +42,11 @@ import com.google.gson.JsonSyntaxException;
 
 @RestController
 public class ApiController {
+	@Autowired
+	Environment env;
 	   private String url ="https://api.sys.eu.cfdev.canopy-cloud.com/v2/spaces";  
 	   private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
+	  
 	   RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	   
@@ -58,8 +61,8 @@ public class ApiController {
 	    Map<String, String> params = new HashMap<String, String>();
 	    ObjectMapper mapper = new ObjectMapper();
 	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", "application/x-www-form-urlencoded");
-	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+	    headers.add("Content-Type", env.getProperty("Content-Type-json"));
+	    headers.add("Accept", env.getProperty("Host"));
 		Map<String,Object> requestParams = mapper.readValue(json, Map.class);
 		
 		  orgName = (String) requestParams.get("organizationName");
@@ -88,7 +91,7 @@ public class ApiController {
 		
 	}
 	public String getUaaToken(){
-		 String token =  restTemplate.getForObject(uaaUrl, String.class);
+		 String token =  restTemplate.getForObject(env.getProperty("uaaUrl"), String.class);
 		 return token;
 	}
 	public String getOrgGuid(String orgName){
