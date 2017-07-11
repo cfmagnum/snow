@@ -14,6 +14,7 @@ import javax.net.ssl.TrustManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -27,16 +28,17 @@ import org.springframework.web.client.RestTemplate;
 
 @RestController
 public class ApiController {
+	@Autowired
+	Environment env;
 	   private String url ="https://uaa.sys.eu.cfdev.canopy-cloud.com/userinfo";  
 	   private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
-	   RestTemplate restTemplate = new RestTemplate();
+	    RestTemplate restTemplate = new RestTemplate();
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
 	@RequestMapping("/v1/fetch-user-information")   
 	public ResponseEntity<String> getuserInfo(Model model) {
 		model.addAttribute("instanceInfo", instanceInfo);
-	    String uaatoken =  restTemplate.getForObject(uaaUrl, String.class);
+	    String uaatoken =  restTemplate.getForObject(env.getProperty("uaaUrl"), String.class);
 	    headers.add("Authorization", uaatoken);
 	  
 	    restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
