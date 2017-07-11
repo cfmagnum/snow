@@ -1,11 +1,11 @@
 package com.snow;
 
 
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -39,10 +39,16 @@ public class ApiController {
 	@RequestMapping("/Snow-proxy/v2/ResetPassword")   
 	public ResponseEntity<String> associateUserWithSpace() throws FileNotFoundException, IOException {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		
+		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("http.proxyPort","84"); 
+		System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("https.proxyPort","84"); 
+		
 	    String uaatoken =  getUaaToken();
 	    
-	    String username = "testuser3@cf.com";
-	   
+	    String username = "snow@gmail.com";
+	    System.out.println(username);
 	 //   String uaaId= getUserUaaId(userEmailId);
 	    String url= "https://uaa.sys.eu.cfdev.canopy-cloud.com/password_resets";
 	    headers.add("Authorization", uaatoken);
@@ -78,7 +84,15 @@ public class ApiController {
 	
 	public String getOrgGuid(String orgName){
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		
+		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("http.proxyPort","84"); 
+		System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("https.proxyPort","84"); 
+		
 		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:" + orgName;	
+		
+		System.out.println(orgName);
 	    String uaatoken =  getUaaToken();
 	    String guid="";
 	    JsonObject resources = new JsonObject();
@@ -112,6 +126,11 @@ public class ApiController {
 	   return guid;		
 	}
 	public String getSpaceGuid(String orgGuid, String spaceName){
+		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("http.proxyPort","84"); 
+		System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("https.proxyPort","84"); 
+		
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations/" + orgGuid + "/spaces" + "?q=name:" + spaceName;	
 	    String uaatoken =  getUaaToken();
@@ -149,6 +168,12 @@ public class ApiController {
 	}
 	public String getUserUaaId(String userEmailId){
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		
+		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("http.proxyPort","84"); 
+		System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("https.proxyPort","84"); 
+		
 		String url= "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users?filter=emails.value eq '" + userEmailId + "'";	
 	    String uaatoken = getUaaToken();
 	    String UaaId="";
