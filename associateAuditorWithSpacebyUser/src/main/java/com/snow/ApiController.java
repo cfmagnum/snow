@@ -84,7 +84,7 @@ public class ApiController {
 	    
 	    headers.add("Authorization", uaatoken);
 	    headers.add("Content-Type", env.getProperty("Content-Type-json"));
-	    headers.add("Accept", env.getProperty("Host"));;
+	    headers.add("Accept", env.getProperty("Host"));
 	    try {
 			skipSslValidation(url);
 		} catch (Exception e) {
