@@ -62,8 +62,10 @@ public class ApiController {
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
 		String uaatoken = getUaaToken();
+
 		String orgName = (String) requestParams.get("organizationName");
 		String orgGuid = getOrgGuid(orgName);
+
 		String userEmailId = (String) requestParams.get("userEmailId");
 		String uaaId = getUserUaaId(userEmailId);
 		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/users/"
@@ -91,7 +93,7 @@ public class ApiController {
 	}
 
 	public String getUaaToken() {
-		String token = restTemplate.getForObject(env.getProperty("UaaUrl"),
+		String token = restTemplate.getForObject(env.getProperty("uaaUrl"),
 				String.class);
 		return token;
 	}
