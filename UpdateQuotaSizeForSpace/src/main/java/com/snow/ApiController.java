@@ -1,30 +1,26 @@
 package com.snow;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
-import javax.net.ssl.TrustManager;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
 import org.springframework.core.env.Environment;
-import org.springframework.ui.Model;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -53,8 +49,6 @@ public class ApiController {
 	@RequestMapping(value = "/v1/update-quota-size-of-space", method = RequestMethod.POST)
 	public ResponseEntity<String> updateQuotaSizeOfSpace(Model model,
 			@RequestBody String json) throws FileNotFoundException, IOException {
-		model.addAttribute("instanceInfo", instanceInfo);
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 
 		System.getProperties().put("http.proxyHost",
 				"proxy-in.glb.my-it-solutions.net");
@@ -62,6 +56,8 @@ public class ApiController {
 		System.getProperties().put("https.proxyHost",
 				"proxy-in.glb.my-it-solutions.net");
 		System.getProperties().put("https.proxyPort", "84");
+		model.addAttribute("instanceInfo", instanceInfo);
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 
 		// Map<String, Object> uriVariables = new Hashmap<String, Object>();
 		String spaceName = "";
@@ -112,6 +108,7 @@ public class ApiController {
 	public String getUaaToken() {
 		String token = restTemplate.getForObject(env.getProperty("uaaUrl"),
 				String.class);
+		System.out.println(token);
 		return token;
 	}
 
