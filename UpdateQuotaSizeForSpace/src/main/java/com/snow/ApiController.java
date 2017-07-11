@@ -21,6 +21,7 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.core.env.Environment;
 import org.springframework.ui.Model;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -43,9 +44,10 @@ import com.google.gson.JsonSyntaxException;
 
 @RestController
 public class ApiController {
-	  // private String orgurl ="https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations";  
-	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
-	   RestTemplate restTemplate = new RestTemplate();
+@Autowired
+	Environment env;
+
+	RestTemplate restTemplate = new RestTemplate();
 	   private Gson gson = new Gson(); 
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	 
@@ -53,10 +55,12 @@ public class ApiController {
 	public ResponseEntity<String> updateQuotaSizeOfSpace(Model model,@RequestBody String json) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		
 		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
 		System.getProperties().put("http.proxyPort","84"); 
 		System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
 		System.getProperties().put("https.proxyPort","84"); 
+		
 		//Map<String, Object> uriVariables = new Hashmap<String, Object>();
 		String spaceName ="";
 		String uaatoken="";
@@ -72,8 +76,8 @@ public class ApiController {
 	    
 	    url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/space_quota_definitions/" + quota_definition_guid;
 	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", "application/json");
-	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+	    headers.add("Content-Type", env.getProperty("Content-Type-json"));
+	    headers.add("Accept", env.getProperty("Host"));
 	    System.out.println(url);
 	    try {
 			skipSslValidation(url);
@@ -103,7 +107,7 @@ public class ApiController {
 	
 	
 	public String getUaaToken(){
-		 String token =  restTemplate.getForObject(uaaUrl, String.class);
+		String token =  restTemplate.getForObject(env.getProperty("uaaUrl"), String.class);
 		 return token;
 	}
 	
