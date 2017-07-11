@@ -21,6 +21,7 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.core.env.Environment;
 import org.springframework.ui.Model;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -43,8 +44,8 @@ import com.google.gson.JsonSyntaxException;
 
 @RestController
 public class ApiController {
-	  // private String orgurl ="https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations";  
-	   private String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
+	@Autowired
+	Environment env;
 	   RestTemplate restTemplate = new RestTemplate();
 	   private Gson gson = new Gson(); 
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
@@ -52,6 +53,10 @@ public class ApiController {
 	@RequestMapping(value= "/v1/update-quota-size-of-org", method = RequestMethod.POST)   
 	public ResponseEntity<String> updateQuotaSizeOfOrg(Model model,@RequestBody String json) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
+		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("http.proxyPort","84"); 
+		System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("https.proxyPort","84"); 
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		//Map<String, Object> uriVariables = new Hashmap<String, Object>();
 		String orgName ="";
@@ -68,8 +73,8 @@ public class ApiController {
 	    
 	    url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/quota_definitions/" + quota_definition_guid;
 	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", "application/json");
-	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+	    headers.add("Content-Type", env.getProperty("Content-Type-json"));
+	    headers.add("Accept", env.getProperty("Host"));
 	   
 	    try {
 			skipSslValidation(url);
@@ -92,14 +97,14 @@ public class ApiController {
 	    String jsonData = gson.toJson(params);
 	    HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
 	    
-	   // System.out.println(params);
+	    System.out.println(params);
 	    ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
 	    return response;		
 	}
 	
 	
 	public String getUaaToken(){
-		 String token =  restTemplate.getForObject(uaaUrl, String.class);
+		 String token =  restTemplate.getForObject(env.getProperty("uaaUrl"), String.class);
 		 return token;
 	}
 	
@@ -107,6 +112,7 @@ public class ApiController {
 	public String getQuotaDefinitionGuid(String orgName){
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:" + orgName;	
+		  System.out.println(url);
 	    String uaatoken =  getUaaToken();
 	    String quota_definition_guid="";
 	    JsonObject resources = new JsonObject();
@@ -121,6 +127,7 @@ public class ApiController {
 			e.printStackTrace();
 		}
 	    HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
+	   
 	    String orgInfo = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class).getBody();
 	    try {
 			job = gson.fromJson(orgInfo, JsonObject.class);
@@ -135,9 +142,10 @@ public class ApiController {
 		    }		
 		    
 		    JsonObject metadata =resources.get("entity").getAsJsonObject();
+		    System.out.println(metadata);
 		    quota_definition_guid = metadata.get("quota_definition_guid").getAsString();
 	    }
-		
+		System.out.println(quota_definition_guid);
 	   return quota_definition_guid;		
 	}
 	
