@@ -26,70 +26,74 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
-
 @RestController
 public class ApiController {
 	@Autowired
 	Environment env;
-   
-   private String url = "https://login.sys.eu.cfdev.canopy-cloud.com/oauth/token";
-   private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-   private Map<String, Object> token = new HashMap<String, Object>();
-   private String json ="grant_type=password&username=admin&password=JioovG*jCadGect37mkyuur9kyat$"; 
-   RestTemplate restTemplate = new RestTemplate();
-   
-   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
-   
-   @RequestMapping("/v1/get-UAA-token")
-   public String getAuthorizationToken(Model model) {
-	   
-	   System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("http.proxyPort","84");
-		System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("https.proxyPort","84");
-		
-	   model.addAttribute("instanceInfo", instanceInfo);
-	    headers.add("Authorization", "Basic Y2Y6");
-	    headers.add("cache-control",env.getProperty("cache-control"));
-	    headers.add("Content-Type", env.getProperty("Content-Type"));
-	    headers.add("x-uaa-endpoint", env.getProperty("UAA"));
-	    headers.add("accept", env.getProperty("Content-Type-json"));
-	    headers.add("charset", "utf-8");
-	    restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
+
+	private String url = "https://login.sys.eu.cfdev.canopy-cloud.com/oauth/token";
+	private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+	private Map<String, Object> token = new HashMap<String, Object>();
+	private String json = "grant_type=password&username=admin&password=JioovG*jCadGect37mkyuur9kyat$";
+	RestTemplate restTemplate = new RestTemplate();
+
+	@Autowired(required = false)
+	ApplicationInstanceInfo instanceInfo;
+
+	@RequestMapping("/v1/get-UAA-token")
+	public String getAuthorizationToken(Model model) {
+
+		System.getProperties().put("http.proxyHost",
+				"proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("http.proxyPort", "84");
+		System.getProperties().put("https.proxyHost",
+				"proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("https.proxyPort", "84");
+
+		model.addAttribute("instanceInfo", instanceInfo);
+		headers.add("Authorization", "Basic Y2Y6");
+		headers.add("cache-control", env.getProperty("cache-control"));
+		headers.add("Content-Type", env.getProperty("Content-Type"));
+		headers.add("x-uaa-endpoint", env.getProperty("UAA"));
+		headers.add("accept", env.getProperty("Content-Type-json"));
+		headers.add("charset", "utf-8");
+		restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
 			protected boolean hasError(HttpStatus statusCode) {
 				return false;
 			}
-		});	
-	  
-	  	    
-	    HttpEntity<String> httpEntity = new HttpEntity<>(json, headers);
-	    try {
+		});
+
+		HttpEntity<String> httpEntity = new HttpEntity<>(json, headers);
+		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	 
-	   
-	    JacksonJsonParser parser = new JacksonJsonParser();
-		token = parser.parseMap(restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class).getBody());
-		
-		String authorizationKey = token.get("token_type") + " " + token.get("access_token");
-		
+
+		JacksonJsonParser parser = new JacksonJsonParser();
+		token = parser.parseMap(restTemplate.exchange(url, HttpMethod.POST,
+				httpEntity, String.class).getBody());
+
+		String authorizationKey = token.get("token_type") + " "
+				+ token.get("access_token");
+
 		return authorizationKey;
-		
-	    
-    }
-   public void skipSslValidation(String ConnectionURL) throws Exception {
+
+	}
+
+	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
 				return null;
 			}
 
-			public void checkClientTrusted(X509Certificate[] certs, String authType) {
+			public void checkClientTrusted(X509Certificate[] certs,
+					String authType) {
 			}
 
-			public void checkServerTrusted(X509Certificate[] certs, String authType) {
+			public void checkServerTrusted(X509Certificate[] certs,
+					String authType) {
 			}
 		} };
 
@@ -108,7 +112,6 @@ public class ApiController {
 		// Install the all-trusting host verifier
 		HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
 
-		
-   }
+	}
 
 }

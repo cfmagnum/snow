@@ -1,26 +1,15 @@
 package com.snow;
 
-
-
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 
-import javax.net.ssl.TrustManager;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-
-
-
-
-
-
-
-
-
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
@@ -51,141 +40,157 @@ import com.google.gson.JsonSyntaxException;
 public class ApiController {
 	@Autowired
 	Environment env;
-	   RestTemplate restTemplate = new RestTemplate();
-	 
-	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
-	   
-	@RequestMapping(value = "/v1/associate-user-with-org", method = RequestMethod.POST) 
-	public ResponseEntity<String> associateUserWithOrg(Model model,@RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
+	RestTemplate restTemplate = new RestTemplate();
+
+	@Autowired(required = false)
+	ApplicationInstanceInfo instanceInfo;
+
+	@RequestMapping(value = "/v1/associate-user-with-org", method = RequestMethod.POST)
+	public ResponseEntity<String> associateUserWithOrg(Model model,
+			@RequestBody String json) throws JsonParseException,
+			JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		
-		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
-        System.getProperties().put("http.proxyPort","84"); 
-        System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
-        System.getProperties().put("https.proxyPort","84");
-        
+
+		System.getProperties().put("http.proxyHost",
+				"proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("http.proxyPort", "84");
+		System.getProperties().put("https.proxyHost",
+				"proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("https.proxyPort", "84");
+
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		ObjectMapper mapper = new ObjectMapper();
-	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
-	    String uaatoken =  getUaaToken();
-	    String orgName = (String) requestParams.get("organizationName");
-	    String orgGuid= getOrgGuid(orgName);
-	    String userEmailId = (String) requestParams.get("userEmailId");
-	    String uaaId= getUserUaaId(userEmailId);
-	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/users/" + uaaId + "/organizations/" + orgGuid;
-	   
-	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", env.getProperty("Content-Type-json"));
-	    headers.add("Accept", env.getProperty("Host"));
-	    try {
+		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
+		String uaatoken = getUaaToken();
+		String orgName = (String) requestParams.get("organizationName");
+		String orgGuid = getOrgGuid(orgName);
+		String userEmailId = (String) requestParams.get("userEmailId");
+		String uaaId = getUserUaaId(userEmailId);
+		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/users/"
+				+ uaaId + "/organizations/" + orgGuid;
+
+		headers.add("Authorization", uaatoken);
+		headers.add("Content-Type", env.getProperty("Content-Type-json"));
+		headers.add("Accept", env.getProperty("Host"));
+		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
+		restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
 			protected boolean hasError(HttpStatus statusCode) {
 				return false;
 			}
-		});	
-	    HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-	    System.out.println(orgName+orgGuid+userEmailId+url);
-	    ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
-	    return response;		
+		});
+		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
+		System.out.println(orgName + orgGuid + userEmailId + url);
+		ResponseEntity<String> response = restTemplate.exchange(url,
+				HttpMethod.PUT, requestEntity, String.class);
+		return response;
 	}
-	
-	
-	public String getUaaToken(){
-		 String token =  restTemplate.getForObject(env.getProperty("UaaUrl"), String.class);
-		 return token;
+
+	public String getUaaToken() {
+		String token = restTemplate.getForObject(env.getProperty("UaaUrl"),
+				String.class);
+		return token;
 	}
-	
-	
-	public String getOrgGuid(String orgName){
+
+	public String getOrgGuid(String orgName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
-        System.getProperties().put("http.proxyPort","84"); 
-        System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
-        System.getProperties().put("https.proxyPort","84");  
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:" + orgName;	
-	    String uaatoken =  getUaaToken();
-	    String guid="";
-	    JsonObject resources = new JsonObject();
-	    Gson gson = new GsonBuilder().create();
-	    JsonObject job=new JsonObject();
-	    headers.add("Authorization", uaatoken);
-	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
-	    try {
+		System.getProperties().put("http.proxyHost",
+				"proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("http.proxyPort", "84");
+		System.getProperties().put("https.proxyHost",
+				"proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("https.proxyPort", "84");
+		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:"
+				+ orgName;
+		String uaatoken = getUaaToken();
+		String guid = "";
+		JsonObject resources = new JsonObject();
+		Gson gson = new GsonBuilder().create();
+		JsonObject job = new JsonObject();
+		headers.add("Authorization", uaatoken);
+		headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-	    String orgInfo = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class).getBody();
-	    try {
+		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
+		String orgInfo = restTemplate.exchange(url, HttpMethod.GET,
+				requestEntity, String.class).getBody();
+		try {
 			job = gson.fromJson(orgInfo, JsonObject.class);
 		} catch (JsonSyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	 
-		if(job!=null){
-		    if(job.getAsJsonArray("resources")!=null){
-		    	resources=job.getAsJsonArray("resources").get(0).getAsJsonObject();
-		    }		
-		    
-		    JsonObject metadata =resources.get("metadata").getAsJsonObject();
-		    guid = metadata.get("guid").getAsString();
-	    }
-	   return guid;		
+
+		if (job != null) {
+			if (job.getAsJsonArray("resources") != null) {
+				resources = job.getAsJsonArray("resources").get(0)
+						.getAsJsonObject();
+			}
+
+			JsonObject metadata = resources.get("metadata").getAsJsonObject();
+			guid = metadata.get("guid").getAsString();
+		}
+		return guid;
 	}
-	
-	public String getUserUaaId(String userEmailId){
+
+	public String getUserUaaId(String userEmailId) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url= "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users?filter=emails.value eq '" + userEmailId + "'";	
-	    String uaatoken = getUaaToken();
-	    String UaaId="";
-	    JsonObject resources = new JsonObject();
-	    Gson gson = new GsonBuilder().create();
-	    JsonObject job=new JsonObject();
-	    headers.add("Authorization", uaatoken);
-	    headers.add("content-type", "application/json");
-	    headers.add("Accept","application/json");
-	    try {
+		String url = "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users?filter=emails.value eq '"
+				+ userEmailId + "'";
+		String uaatoken = getUaaToken();
+		String UaaId = "";
+		JsonObject resources = new JsonObject();
+		Gson gson = new GsonBuilder().create();
+		JsonObject job = new JsonObject();
+		headers.add("Authorization", uaatoken);
+		headers.add("content-type", "application/json");
+		headers.add("Accept", "application/json");
+		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-	    String userinfo = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class).getBody();
-	    try {
+		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
+		String userinfo = restTemplate.exchange(url, HttpMethod.GET,
+				requestEntity, String.class).getBody();
+		try {
 			job = gson.fromJson(userinfo, JsonObject.class);
 		} catch (JsonSyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	 
-		if(job!=null){
-		    if(job.getAsJsonArray("resources")!=null){
-		    	resources=job.getAsJsonArray("resources").get(0).getAsJsonObject();    
-		    	UaaId = resources.get("id").getAsString();
-		    }
-	    }
-	   return UaaId;	
+
+		if (job != null) {
+			if (job.getAsJsonArray("resources") != null) {
+				resources = job.getAsJsonArray("resources").get(0)
+						.getAsJsonObject();
+				UaaId = resources.get("id").getAsString();
+			}
+		}
+		return UaaId;
 	}
-	
+
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
 				return null;
 			}
 
-			public void checkClientTrusted(X509Certificate[] certs, String authType) {
+			public void checkClientTrusted(X509Certificate[] certs,
+					String authType) {
 			}
 
-			public void checkServerTrusted(X509Certificate[] certs, String authType) {
+			public void checkServerTrusted(X509Certificate[] certs,
+					String authType) {
 			}
 		} };
 
@@ -204,6 +209,5 @@ public class ApiController {
 		// Install the all-trusting host verifier
 		HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
 
-		
-   }
+	}
 }

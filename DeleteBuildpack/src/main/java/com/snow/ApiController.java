@@ -1,7 +1,5 @@
 package com.snow;
 
-
-
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
@@ -41,105 +39,113 @@ import com.google.gson.JsonSyntaxException;
 public class ApiController {
 	@Autowired
 	Environment env;
-	
-	   RestTemplate restTemplate = new RestTemplate();
-	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
-	   
-	@RequestMapping(value="/v1/delete-buildpack", method = RequestMethod.POST)   
-	public HttpStatus deleteBuildpack(Model model, @RequestBody String json) throws JsonParseException, JsonMappingException, IOException {
+
+	RestTemplate restTemplate = new RestTemplate();
+	@Autowired(required = false)
+	ApplicationInstanceInfo instanceInfo;
+
+	@RequestMapping(value = "/v1/delete-buildpack", method = RequestMethod.POST)
+	public HttpStatus deleteBuildpack(Model model, @RequestBody String json)
+			throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		
-		    System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
-			System.getProperties().put("http.proxyPort","84"); 
-			System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
-			System.getProperties().put("https.proxyPort","84");
-		
-	    String uaatoken =  getUaaToken();
-	    ObjectMapper mapper = new ObjectMapper();
-	    Map<String,Object> requestParams = mapper.readValue(json, Map.class);
-	    
-	    String buildpackName = (String) requestParams.get("name");
-	    String buildpackGuid = getBuildpackGuid(buildpackName);
-	    String url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/buildpacks/" + buildpackGuid;
-	    
-	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", env.getProperty("Content-Type-json"));
-	    headers.add("Host", env.getProperty("Host"));
-	    try {
+
+		System.getProperties().put("http.proxyHost",
+				"proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("http.proxyPort", "84");
+		System.getProperties().put("https.proxyHost",
+				"proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("https.proxyPort", "84");
+
+		String uaatoken = getUaaToken();
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
+
+		String buildpackName = (String) requestParams.get("name");
+		String buildpackGuid = getBuildpackGuid(buildpackName);
+		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/buildpacks/"
+				+ buildpackGuid;
+
+		headers.add("Authorization", uaatoken);
+		headers.add("Content-Type", env.getProperty("Content-Type-json"));
+		headers.add("Host", env.getProperty("Host"));
+		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
+		restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
 			protected boolean hasError(HttpStatus statusCode) {
 				return false;
 			}
-		});	
-	    HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-	    
-	    HttpStatus response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, String.class).getStatusCode();
-	    System.out.println(response);
-	    return response;		
+		});
+		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
+
+		HttpStatus response = restTemplate.exchange(url, HttpMethod.DELETE,
+				requestEntity, String.class).getStatusCode();
+		System.out.println(response);
+		return response;
 	}
-	
-	
-	public String getUaaToken(){
-		 String token =  restTemplate.getForObject(env.getProperty("uaaUrl"), String.class);
-		 return token;
+
+	public String getUaaToken() {
+		String token = restTemplate.getForObject(env.getProperty("uaaUrl"),
+				String.class);
+		return token;
 	}
-	
-	
-	public String getBuildpackGuid(String buildpackName){
+
+	public String getBuildpackGuid(String buildpackName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/buildpacks?q=name:" + buildpackName;	
-	    String uaatoken =  getUaaToken();
-	    String guid="";
-	    JsonObject resources = new JsonObject();
-	    Gson gson = new GsonBuilder().create();
-	    JsonObject job=new JsonObject();
-	    headers.add("Authorization", uaatoken);
-	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
-	    try {
+		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/buildpacks?q=name:"
+				+ buildpackName;
+		String uaatoken = getUaaToken();
+		String guid = "";
+		JsonObject resources = new JsonObject();
+		Gson gson = new GsonBuilder().create();
+		JsonObject job = new JsonObject();
+		headers.add("Authorization", uaatoken);
+		headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-	    String buildpackInfo = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class).getBody();
-	    try {
+		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
+		String buildpackInfo = restTemplate.exchange(url, HttpMethod.GET,
+				requestEntity, String.class).getBody();
+		try {
 			job = gson.fromJson(buildpackInfo, JsonObject.class);
 		} catch (JsonSyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	  
-		if(job!=null){
-		    if(job.getAsJsonArray("resources")!=null){
-		    	resources=job.getAsJsonArray("resources").get(0).getAsJsonObject();
-		    }		
-		    
-		    JsonObject metadata =resources.get("metadata").getAsJsonObject();
-		    guid = metadata.get("guid").getAsString();
-	    }
-		
-	   return guid;		
+
+		if (job != null) {
+			if (job.getAsJsonArray("resources") != null) {
+				resources = job.getAsJsonArray("resources").get(0)
+						.getAsJsonObject();
+			}
+
+			JsonObject metadata = resources.get("metadata").getAsJsonObject();
+			guid = metadata.get("guid").getAsString();
+		}
+
+		return guid;
 	}
-	
-	
-	
+
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
 				return null;
 			}
 
-			public void checkClientTrusted(X509Certificate[] certs, String authType) {
+			public void checkClientTrusted(X509Certificate[] certs,
+					String authType) {
 			}
 
-			public void checkServerTrusted(X509Certificate[] certs, String authType) {
+			public void checkServerTrusted(X509Certificate[] certs,
+					String authType) {
 			}
 		} };
 
@@ -158,6 +164,5 @@ public class ApiController {
 		// Install the all-trusting host verifier
 		HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
 
-		
-   }
+	}
 }

@@ -1,7 +1,5 @@
 package com.snow;
 
-
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -44,133 +42,144 @@ import com.google.gson.JsonSyntaxException;
 
 @RestController
 public class ApiController {
-@Autowired
+	@Autowired
 	Environment env;
 
 	RestTemplate restTemplate = new RestTemplate();
-	   private Gson gson = new Gson(); 
-	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
-	 
-	@RequestMapping(value= "/v1/update-quota-size-of-space", method = RequestMethod.POST)   
-	public ResponseEntity<String> updateQuotaSizeOfSpace(Model model,@RequestBody String json) throws FileNotFoundException, IOException {
+	private Gson gson = new Gson();
+	@Autowired(required = false)
+	ApplicationInstanceInfo instanceInfo;
+
+	@RequestMapping(value = "/v1/update-quota-size-of-space", method = RequestMethod.POST)
+	public ResponseEntity<String> updateQuotaSizeOfSpace(Model model,
+			@RequestBody String json) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		
-		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("http.proxyPort","84"); 
-		System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("https.proxyPort","84"); 
-		
-		//Map<String, Object> uriVariables = new Hashmap<String, Object>();
-		String spaceName ="";
-		String uaatoken="";
-		String quota_definition_guid="";
+
+		System.getProperties().put("http.proxyHost",
+				"proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("http.proxyPort", "84");
+		System.getProperties().put("https.proxyHost",
+				"proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("https.proxyPort", "84");
+
+		// Map<String, Object> uriVariables = new Hashmap<String, Object>();
+		String spaceName = "";
+		String uaatoken = "";
+		String quota_definition_guid = "";
 		String url = "";
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> params = new HashMap<String, Object>();
-		Map<String,Object> requestParams = mapper.readValue(json, Map.class);
-	    uaatoken =  getUaaToken();
-	    spaceName = (String) requestParams.get("spaceName");
-	    quota_definition_guid= getQuotaDefinitionGuid(spaceName);
-	    System.out.println(spaceName);
-	    
-	    url= "https://api.sys.eu.cfdev.canopy-cloud.com/v2/space_quota_definitions/" + quota_definition_guid;
-	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", env.getProperty("Content-Type-json"));
-	    headers.add("Accept", env.getProperty("Host"));
-	    System.out.println(url);
-	    try {
+		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
+		uaatoken = getUaaToken();
+		spaceName = (String) requestParams.get("spaceName");
+		quota_definition_guid = getQuotaDefinitionGuid(spaceName);
+		System.out.println(spaceName);
+
+		url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/space_quota_definitions/"
+				+ quota_definition_guid;
+		headers.add("Authorization", uaatoken);
+		headers.add("Content-Type", env.getProperty("Content-Type-json"));
+		headers.add("Accept", env.getProperty("Host"));
+		System.out.println(url);
+		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
+		restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
 			protected boolean hasError(HttpStatus statusCode) {
 				return false;
 			}
-		});	
-	    
-	    for(String key :requestParams.keySet()){
-	    	if(key!="spaceName"){
-	    		params.put(key, requestParams.get(key));
-	    	}
-	    }
-	    System.out.println(params);
-	    String jsonData = gson.toJson(params);
-	    HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
-	    
-	   // System.out.println(params);
-	    ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
-	    return response;		
+		});
+
+		for (String key : requestParams.keySet()) {
+			if (key != "spaceName") {
+				params.put(key, requestParams.get(key));
+			}
+		}
+		System.out.println(params);
+		String jsonData = gson.toJson(params);
+		HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
+
+		// System.out.println(params);
+		ResponseEntity<String> response = restTemplate.exchange(url,
+				HttpMethod.PUT, requestEntity, String.class);
+		return response;
 	}
-	
-	
-	public String getUaaToken(){
-		String token =  restTemplate.getForObject(env.getProperty("uaaUrl"), String.class);
-		 return token;
+
+	public String getUaaToken() {
+		String token = restTemplate.getForObject(env.getProperty("uaaUrl"),
+				String.class);
+		return token;
 	}
-	
-	
-	public String getQuotaDefinitionGuid(String spaceName){
+
+	public String getQuotaDefinitionGuid(String spaceName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		
-		System.getProperties().put("http.proxyHost","proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("http.proxyPort","84"); 
-		System.getProperties().put("https.proxyHost","proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("https.proxyPort","84"); 
-		
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/spaces?q=name:" + spaceName;	
-		  System.out.println(url);
-		
-		String uaatoken =  getUaaToken();
-	    String quota_definition_guid="";
-	    JsonObject resources = new JsonObject();
-	    Gson gson = new GsonBuilder().create();
-	    JsonObject job=new JsonObject();
-	    headers.add("Authorization", uaatoken);
-	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
-	    try {
+
+		System.getProperties().put("http.proxyHost",
+				"proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("http.proxyPort", "84");
+		System.getProperties().put("https.proxyHost",
+				"proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("https.proxyPort", "84");
+
+		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/spaces?q=name:"
+				+ spaceName;
+		System.out.println(url);
+
+		String uaatoken = getUaaToken();
+		String quota_definition_guid = "";
+		JsonObject resources = new JsonObject();
+		Gson gson = new GsonBuilder().create();
+		JsonObject job = new JsonObject();
+		headers.add("Authorization", uaatoken);
+		headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-	    System.out.println(requestEntity);
-	    String orgInfo = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class).getBody();
-	    try {
+		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
+		System.out.println(requestEntity);
+		String orgInfo = restTemplate.exchange(url, HttpMethod.GET,
+				requestEntity, String.class).getBody();
+		try {
 			job = gson.fromJson(orgInfo, JsonObject.class);
 		} catch (JsonSyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	   
-		if(job!=null){
-		    if(job.getAsJsonArray("resources")!=null){
-		    	resources=job.getAsJsonArray("resources").get(0).getAsJsonObject();
-		    }		
-		    
-		    JsonObject metadata =resources.get("entity").getAsJsonObject();
-		    System.out.println(metadata);
-		    quota_definition_guid = metadata.get("space_quota_definition_guid").getAsString();
-	    }
-		
-	   return quota_definition_guid;		
+
+		if (job != null) {
+			if (job.getAsJsonArray("resources") != null) {
+				resources = job.getAsJsonArray("resources").get(0)
+						.getAsJsonObject();
+			}
+
+			JsonObject metadata = resources.get("entity").getAsJsonObject();
+			System.out.println(metadata);
+			quota_definition_guid = metadata.get("space_quota_definition_guid")
+					.getAsString();
+		}
+
+		return quota_definition_guid;
 	}
-	
-	
-	
+
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
 				return null;
 			}
 
-			public void checkClientTrusted(X509Certificate[] certs, String authType) {
+			public void checkClientTrusted(X509Certificate[] certs,
+					String authType) {
 			}
 
-			public void checkServerTrusted(X509Certificate[] certs, String authType) {
+			public void checkServerTrusted(X509Certificate[] certs,
+					String authType) {
 			}
 		} };
 
@@ -189,6 +198,5 @@ public class ApiController {
 		// Install the all-trusting host verifier
 		HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
 
-		
-   }
+	}
 }

@@ -1,6 +1,5 @@
 package com.snow;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
@@ -14,7 +13,6 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
 import org.springframework.core.env.Environment;
@@ -38,126 +36,134 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
-
-
 @RestController
 public class ApiController {
 	@Autowired
 	Environment env;
-	   private String url ="https://api.sys.eu.cfdev.canopy-cloud.com/v2/spaces";  
-	   private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-	  
-	   RestTemplate restTemplate = new RestTemplate();
-	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
-	   
-	@RequestMapping(value="/v1/create-space" ,method = RequestMethod.POST )   
-	public ResponseEntity<String> Create_Space(Model model, @RequestBody String json) throws FileNotFoundException, IOException{
-		model.addAttribute("instanceInfo",instanceInfo);
-	    String uaatoken =  getUaaToken();
-	    Gson gson = new Gson(); 
-	    String orgName ="";
-	    String orgGuid ="";
-	    String spaceName ="";
-	    Map<String, String> params = new HashMap<String, String>();
-	    ObjectMapper mapper = new ObjectMapper();
-	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", env.getProperty("Content-Type-json"));
-	    headers.add("Accept", env.getProperty("Host"));
-		Map<String,Object> requestParams = mapper.readValue(json, Map.class);
-		
-		  orgName = (String) requestParams.get("organizationName");
-		  orgGuid= getOrgGuid(orgName);
-		  spaceName = (String) requestParams.get("name");
-		
-		 params.put("name", spaceName);
-		 params.put("organization_guid", orgGuid);
-		 
-		 String jsonData = gson.toJson(params);
-		 
-        HttpEntity<String> requestEntity = new HttpEntity<>(jsonData,headers);
-        System.out.println(requestEntity);
-	    try {
+	private String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/spaces";
+	private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+
+	RestTemplate restTemplate = new RestTemplate();
+	@Autowired(required = false)
+	ApplicationInstanceInfo instanceInfo;
+
+	@RequestMapping(value = "/v1/create-space", method = RequestMethod.POST)
+	public ResponseEntity<String> Create_Space(Model model,
+			@RequestBody String json) throws FileNotFoundException, IOException {
+		model.addAttribute("instanceInfo", instanceInfo);
+		String uaatoken = getUaaToken();
+		Gson gson = new Gson();
+		String orgName = "";
+		String orgGuid = "";
+		String spaceName = "";
+		Map<String, String> params = new HashMap<String, String>();
+		ObjectMapper mapper = new ObjectMapper();
+		headers.add("Authorization", uaatoken);
+		headers.add("Content-Type", env.getProperty("Content-Type-json"));
+		headers.add("Accept", env.getProperty("Host"));
+		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
+
+		orgName = (String) requestParams.get("organizationName");
+		orgGuid = getOrgGuid(orgName);
+		spaceName = (String) requestParams.get("name");
+
+		params.put("name", spaceName);
+		params.put("organization_guid", orgGuid);
+
+		String jsonData = gson.toJson(params);
+
+		HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
+		System.out.println(requestEntity);
+		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
+		restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
 			protected boolean hasError(HttpStatus statusCode) {
 				return false;
 			}
-		});	
-		return restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
-		
+		});
+		return restTemplate.exchange(url, HttpMethod.POST, requestEntity,
+				String.class);
+
 	}
-	public String getUaaToken(){
-		 String token =  restTemplate.getForObject(env.getProperty("uaaUrl"), String.class);
-		 return token;
+
+	public String getUaaToken() {
+		String token = restTemplate.getForObject(env.getProperty("uaaUrl"),
+				String.class);
+		return token;
 	}
-	public String getOrgGuid(String orgName){
+
+	public String getOrgGuid(String orgName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:" + orgName;	
-	    String uaatoken =  getUaaToken();
-	    String guid="";
-	    JsonObject resources = new JsonObject();
-	    Gson gson = new GsonBuilder().create();
-	    JsonObject job=new JsonObject();
-	    headers.add("Authorization", uaatoken);
-	    headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
-	    try {
+		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:"
+				+ orgName;
+		String uaatoken = getUaaToken();
+		String guid = "";
+		JsonObject resources = new JsonObject();
+		Gson gson = new GsonBuilder().create();
+		JsonObject job = new JsonObject();
+		headers.add("Authorization", uaatoken);
+		headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-	    String orgInfo = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class).getBody();
-	    try {
+		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
+		String orgInfo = restTemplate.exchange(url, HttpMethod.GET,
+				requestEntity, String.class).getBody();
+		try {
 			job = gson.fromJson(orgInfo, JsonObject.class);
 		} catch (JsonSyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	 
-		if(job!=null){
-		    if(job.getAsJsonArray("resources")!=null){
-		    	resources=job.getAsJsonArray("resources").get(0).getAsJsonObject();
-		    }		
-		    
-		    JsonObject metadata =resources.get("metadata").getAsJsonObject();
-		    guid = metadata.get("guid").getAsString();
-	    }
-	   return guid;		
+
+		if (job != null) {
+			if (job.getAsJsonArray("resources") != null) {
+				resources = job.getAsJsonArray("resources").get(0)
+						.getAsJsonObject();
+			}
+
+			JsonObject metadata = resources.get("metadata").getAsJsonObject();
+			guid = metadata.get("guid").getAsString();
+		}
+		return guid;
 	}
-	
-	   public void skipSslValidation(String ConnectionURL) throws Exception {
-			TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-					return null;
-				}
 
-				public void checkClientTrusted(X509Certificate[] certs, String authType) {
-				}
+	public void skipSslValidation(String ConnectionURL) throws Exception {
+		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+				return null;
+			}
 
-				public void checkServerTrusted(X509Certificate[] certs, String authType) {
-				}
-			} };
+			public void checkClientTrusted(X509Certificate[] certs,
+					String authType) {
+			}
 
-			// Install the all-trusting trust manager
-			SSLContext sc = SSLContext.getInstance("SSL");
-			sc.init(null, trustAllCerts, new java.security.SecureRandom());
-			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+			public void checkServerTrusted(X509Certificate[] certs,
+					String authType) {
+			}
+		} };
 
-			// Create all-trusting host name verifier
-			HostnameVerifier allHostsValid = new HostnameVerifier() {
-				public boolean verify(String hostname, SSLSession session) {
-					return true;
-				}
-			};
+		// Install the all-trusting trust manager
+		SSLContext sc = SSLContext.getInstance("SSL");
+		sc.init(null, trustAllCerts, new java.security.SecureRandom());
+		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
-			// Install the all-trusting host verifier
-			HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+		// Create all-trusting host name verifier
+		HostnameVerifier allHostsValid = new HostnameVerifier() {
+			public boolean verify(String hostname, SSLSession session) {
+				return true;
+			}
+		};
 
-			
-	   }
+		// Install the all-trusting host verifier
+		HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+
+	}
 }
