@@ -52,14 +52,6 @@ public class ApiController {
 			Model model, @RequestBody String json) throws JsonParseException,
 			JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-
-		System.getProperties().put("http.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("http.proxyPort", "84");
-		System.getProperties().put("https.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("https.proxyPort", "84");
-
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		String uaatoken = getUaaToken();
 
@@ -117,13 +109,6 @@ public class ApiController {
 
 	public String getOrgGuid(String orgName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		System.getProperties().put("http.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("http.proxyPort", "84");
-		System.getProperties().put("https.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("https.proxyPort", "84");
-
 		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:"
 				+ orgName;
 		String uaatoken = getUaaToken();
@@ -163,14 +148,6 @@ public class ApiController {
 
 	public String getSpaceGuid(String orgGuid, String spaceName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-
-		System.getProperties().put("http.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("http.proxyPort", "84");
-		System.getProperties().put("https.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("https.proxyPort", "84");
-
 		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations/"
 				+ orgGuid + "/spaces" + "?q=name:" + spaceName;
 		String uaatoken = getUaaToken();

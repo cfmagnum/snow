@@ -45,14 +45,6 @@ public class ApiController {
 	public ResponseEntity<String> AddBuildpack(Model model,
 			@RequestBody String json) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-
-		System.getProperties().put("http.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("http.proxyPort", "84");
-		System.getProperties().put("https.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("https.proxyPort", "84");
-
 		String uaatoken = restTemplate.getForObject(env.getProperty("uaaUrl"),
 				String.class);
 

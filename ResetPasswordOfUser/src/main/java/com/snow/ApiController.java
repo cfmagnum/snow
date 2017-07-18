@@ -43,7 +43,7 @@ public class ApiController {
 	public ResponseEntity<String> ResetPassword(Model model,
 			@RequestBody String json) throws FileNotFoundException, IOException {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-
+		MultiValueMap<String, String> loginheaders = new LinkedMultiValueMap<String, String>();
 		System.getProperties().put("http.proxyHost",
 				"proxy-in.glb.my-it-solutions.net");
 		System.getProperties().put("http.proxyPort", "84");
@@ -65,11 +65,17 @@ public class ApiController {
 		String password = (String) requestParams.get("password");
 		System.out.println(oldPassword + "\n" + password);
 
+		// ResponseEntity<String> response = restTemplate.exchange(url,
+		// HttpMethod.PUT, requestEntity, String.class).getStatusCode();
+		// return response;
+
 		String url = "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users/" + UaaId
-				+ "/password";
+				+ "/password_resets";
 		headers.add("Authorization", uaatoken);
 
+		headers.add("If-Match", "0");
 		headers.add("Content-Type", "application/json");
+		System.out.println(url);
 		// headers.add("Accept", "application/json");
 		// headers.add("If-Match", "0");
 
@@ -86,6 +92,7 @@ public class ApiController {
 		});
 
 		HttpEntity<String> requestEntity = new HttpEntity<>(json, headers);
+
 		ResponseEntity<String> response = restTemplate.exchange(url,
 				HttpMethod.POST, requestEntity, String.class);
 
@@ -94,6 +101,7 @@ public class ApiController {
 		// return response;
 		return restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
 				String.class);
+
 	}
 
 	public String getUaaToken() {

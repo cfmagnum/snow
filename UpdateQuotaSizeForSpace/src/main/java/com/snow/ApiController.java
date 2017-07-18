@@ -50,12 +50,6 @@ public class ApiController {
 	public ResponseEntity<String> updateQuotaSizeOfSpace(Model model,
 			@RequestBody String json) throws FileNotFoundException, IOException {
 
-		System.getProperties().put("http.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("http.proxyPort", "84");
-		System.getProperties().put("https.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("https.proxyPort", "84");
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 
@@ -114,13 +108,6 @@ public class ApiController {
 
 	public String getQuotaDefinitionGuid(String spaceName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-
-		System.getProperties().put("http.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("http.proxyPort", "84");
-		System.getProperties().put("https.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("https.proxyPort", "84");
 
 		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/spaces?q=name:"
 				+ spaceName;

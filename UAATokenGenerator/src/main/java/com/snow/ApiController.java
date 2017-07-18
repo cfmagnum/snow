@@ -43,13 +43,6 @@ public class ApiController {
 	@RequestMapping("/v1/get-UAA-token")
 	public String getAuthorizationToken(Model model) {
 
-		System.getProperties().put("http.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("http.proxyPort", "84");
-		System.getProperties().put("https.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("https.proxyPort", "84");
-
 		model.addAttribute("instanceInfo", instanceInfo);
 		headers.add("Authorization", "Basic Y2Y6");
 		headers.add("cache-control", env.getProperty("cache-control"));

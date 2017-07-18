@@ -49,12 +49,7 @@ public class ApiController {
 	public ResponseEntity<String> updateQuotaSizeOfOrg(Model model,
 			@RequestBody String json) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		System.getProperties().put("http.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("http.proxyPort", "84");
-		System.getProperties().put("https.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("https.proxyPort", "84");
+		
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		// Map<String, Object> uriVariables = new Hashmap<String, Object>();
 		String orgName = "";

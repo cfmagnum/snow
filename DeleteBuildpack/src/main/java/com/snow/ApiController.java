@@ -50,13 +50,6 @@ public class ApiController {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 
-		System.getProperties().put("http.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("http.proxyPort", "84");
-		System.getProperties().put("https.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("https.proxyPort", "84");
-
 		String uaatoken = getUaaToken();
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
