@@ -1,0 +1,7 @@
+---
+applications:
+- name: DeleteOrg
+  instances: 1
+  host: DeleteOrg
+  path: target/DeleteOrg-0.0.1-SNAPSHOT.jar
+
