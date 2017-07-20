@@ -2,5 +2,5 @@
 applications:
 - name: UAATokenGenerator
   instances: 1
-  host: UAATokenGenerator
+  host: acf-api
   path: target/UAATokenGenerator-0.0.1-SNAPSHOT.jar
