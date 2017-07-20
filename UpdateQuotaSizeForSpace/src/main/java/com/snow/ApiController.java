@@ -89,7 +89,7 @@ public class ApiController {
 				params.put(key, requestParams.get(key));
 			}
 		}
-		System.out.println(params);
+		
 		String jsonData = gson.toJson(params);
 		HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
 
