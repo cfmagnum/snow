@@ -3,6 +3,7 @@ package com.snow;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
@@ -28,42 +29,55 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 @RestController
 public class ApiController {
 	@Autowired
-	Environment env;
-
-	private String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/buildpacks";
-	private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-
-	RestTemplate restTemplate = new RestTemplate();
+	Environment env; 
+    
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
-
+    
+	private RestTemplate restTemplate = new RestTemplate();
+	private Gson gson = new Gson();
 	@RequestMapping(value = "/v1/add-build-pack", method = RequestMethod.POST)
 	public ResponseEntity<String> AddBuildpack(Model model,
-			@RequestBody String json) throws FileNotFoundException, IOException {
+			@RequestBody String data) throws FileNotFoundException, IOException {
+		
 		model.addAttribute("instanceInfo", instanceInfo);
-		String uaatoken = restTemplate.getForObject(env.getProperty("uaaUrl"),
-				String.class);
-
+		
+		String url="";
+	    String clientName="";
+	    String authToken="";
 		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
-
-		headers.add("Authorization", uaatoken);
+		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		Map<String, Object> params = new HashMap<String, Object>();
+		
+		clientName =(String) requestParams.get("clientName");
+        url=env.getProperty("url-" +clientName);
+        
+        
+        authToken=(String) requestParams.get("authToken");
+		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
-		headers.add("Host", env.getProperty("Host"));
-
-		HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(
-				requestParams, headers);
+		headers.add("Host", env.getProperty("Host-"+clientName));
+        
+		for (String key : requestParams.keySet()) {
+			if (key !="authToken"&& key!="clientName") {
+				params.put(key, requestParams.get(key));
+			}
+		}
+		String jsonData = gson.toJson(params);
+		HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return restTemplate.exchange(url, HttpMethod.POST, httpEntity,
+		return restTemplate.exchange(url, HttpMethod.POST, requestEntity,
 				String.class);
 
 	}
