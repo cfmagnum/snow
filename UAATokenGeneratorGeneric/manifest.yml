@@ -1,0 +1,8 @@
+---
+applications:
+- name: UAATokenGenratorgeneric
+  instances: 1
+  host: acf-api
+  path: target/UAATokenGeneratorGeneric-0.0.1-SNAPSHOT.jar
+  
+
