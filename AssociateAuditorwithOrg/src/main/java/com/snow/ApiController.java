@@ -71,6 +71,7 @@ public class ApiController {
 		uaaId = getUserUaaId(userEmailId,authToken);
 		
 		url = env.getProperty("url-" +clientName) + orgGuid + "/auditors/" + uaaId;
+		
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
 		headers.add("Host", env.getProperty("Host-"+clientName));
@@ -125,7 +126,7 @@ public class ApiController {
 				resources = job.getAsJsonArray("resources").get(0)
 						.getAsJsonObject();
 			}
-			System.out.println(resources);
+			
 			JsonObject metadata = resources.get("metadata").getAsJsonObject();
 			guid = metadata.get("guid").getAsString();
 		}
