@@ -1,6 +1,6 @@
 ---
 applications:
-- name: AddBuildpack
+- name: AddBuildpackApp
   instances: 1
-  host: AddBuildpack
+  host: AddBuildpackApp
   path: target/AddBuildpackApp-0.0.1-SNAPSHOT.jar

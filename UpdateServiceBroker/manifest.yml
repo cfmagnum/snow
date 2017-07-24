@@ -2,5 +2,5 @@
 applications:
 - name: updateServiceBroker
   instances: 1
-  host: updateServiceBroker
+  host: UpdateServiceBroker
   path: target/updateServiceBroker-0.0.1-SNAPSHOT.jar

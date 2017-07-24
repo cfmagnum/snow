@@ -2,7 +2,7 @@
 applications:
 - name: UAATokenGenratorgeneric
   instances: 1
-  host: acf-api
+  host: UAATokenGenratorgeneric
   path: target/UAATokenGeneratorGeneric-0.0.1-SNAPSHOT.jar
   
 

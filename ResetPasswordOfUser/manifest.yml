@@ -1,0 +1,7 @@
+---
+applications:
+- name: ResetPasswordOfUser
+  instances: 1
+  host: ResetPasswordOfUser
+  path: target/ResetPasswordOfUser-0.0.1-SNAPSHOT.jar
+
