@@ -54,12 +54,12 @@ public class ApiController {
 		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		Map<String, Object> params = new HashMap<String, Object>();
-		
+		authToken=(String) requestParams.get("authToken");
 		clientName =(String) requestParams.get("clientName");
         url=env.getProperty("url-" +clientName);
         
         
-        authToken=(String) requestParams.get("authToken");
+        
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
 		headers.add("Host", env.getProperty("Host-"+clientName));

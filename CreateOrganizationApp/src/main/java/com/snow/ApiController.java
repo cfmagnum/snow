@@ -2,7 +2,16 @@ package com.snow;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Map;
+import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
@@ -20,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 @RestController
 public class ApiController {
@@ -27,37 +37,79 @@ public class ApiController {
 	@Autowired
 	Environment env;
 
-	private String url = "http://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations";
-	private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-	// private String uaaUrl =
-	// "http://localhost:8181/Snow-proxy/v2/Authorization";
-
-	RestTemplate restTemplate = new RestTemplate();
-
+	private RestTemplate restTemplate = new RestTemplate();
+	private Gson gson = new Gson();
+	
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
 	@RequestMapping(value = "/v1/create-organization", method = RequestMethod.POST)
 	public ResponseEntity<String> Create_Organization(Model model,
-			@RequestBody String json) throws FileNotFoundException, IOException {
+			@RequestBody String data) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-
+        
+		String url="";
+	    String clientName="";
+	    String authToken="";
 		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
-		System.out.println(requestParams);
-		String uaatoken = restTemplate.getForObject(env.getProperty("uaaUrl"),
-				String.class);
-		headers.add("Authorization", uaatoken);
+		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		Map<String, Object> params = new HashMap<String, Object>();
+		authToken=(String) requestParams.get("authToken");
+		clientName =(String) requestParams.get("clientName");
+		
+		url=env.getProperty("url-" +clientName);
+		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
-		headers.add("Accept", env.getProperty("Host"));
+		headers.add("Accept", env.getProperty("Host-"+clientName));
 
-		HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(
-				requestParams, headers);
-		System.out.println(httpEntity);
-		// HttpEntity<String> requestEntity = new HttpEntity<>("Headers",
-		// headers);
-		return restTemplate.exchange(url, HttpMethod.POST, httpEntity,
+		for (String key : requestParams.keySet()) {
+			if (key !="authToken"&& key!="clientName") {
+				params.put(key, requestParams.get(key));
+			}
+		}
+		String jsonData = gson.toJson(params);
+
+		try {
+			skipSslValidation(url);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
+		
+		
+		return restTemplate.exchange(url, HttpMethod.POST, requestEntity,
 				String.class);
 
 	}
+	public void skipSslValidation(String ConnectionURL) throws Exception {
+		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+				return null;
+			}
+
+			public void checkClientTrusted(X509Certificate[] certs, String authType) {
+			}
+
+			public void checkServerTrusted(X509Certificate[] certs, String authType) {
+			}
+		} };
+
+		// Install the all-trusting trust manager
+		SSLContext sc = SSLContext.getInstance("SSL");
+		sc.init(null, trustAllCerts, new java.security.SecureRandom());
+		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+		// Create all-trusting host name verifier
+		HostnameVerifier allHostsValid = new HostnameVerifier() {
+			public boolean verify(String hostname, SSLSession session) {
+				return true;
+			}
+		};
+
+		// Install the all-trusting host verifier
+		HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+
+	}
+
 }
