@@ -18,14 +18,24 @@ public class ApiGateway {
 	private Environment env;
 	private RestTemplate restTemplate = new RestTemplate();
 	ApplicationInstanceInfo instanceInfo;
+	
 	@RequestMapping(value = "/v1/get-UAA-token", method = RequestMethod.POST)
 	public String getToken(Model model,
 			@RequestBody String data)  {
 		model.addAttribute("instanceInfo", instanceInfo);
 		String url = env.getProperty("url-uaa-token-api");
-		System.out.println(url);
 		return restTemplate.postForObject(url,data,String.class);
 	}
+	
+	@RequestMapping(value = "/v1/add-build-pack", method = RequestMethod.POST)
+	public String addBuildpack(Model model,
+			@RequestBody String data)  {
+		model.addAttribute("instanceInfo", instanceInfo);
+		String url = env.getProperty("url-add-buildpack");
+		return restTemplate.postForObject(url,data,String.class);
+	}
+	
+	
 	
 	}
 
