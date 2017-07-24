@@ -18,7 +18,7 @@ public class ApiGateway {
 	private Environment env;
 	private RestTemplate restTemplate = new RestTemplate();
 	ApplicationInstanceInfo instanceInfo;
-	@RequestMapping(value = "/v1/get-token", method = RequestMethod.POST)
+	@RequestMapping(value = "/v1/get-UAA-token", method = RequestMethod.POST)
 	public String getToken(Model model,
 			@RequestBody String data)  {
 		model.addAttribute("instanceInfo", instanceInfo);
