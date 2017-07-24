@@ -1,0 +1,6 @@
+---
+applications:
+- name: ACFApiGateway
+  instances: 1
+  host: acf-api
+  path: target/AcfApiApp-0.0.1-SNAPSHOT.jar
