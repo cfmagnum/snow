@@ -40,40 +40,55 @@ import com.google.gson.JsonSyntaxException;
 public class ApiController {
 	@Autowired
 	Environment env;
-	private String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/spaces";
-	private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+	
+	
 
-	RestTemplate restTemplate = new RestTemplate();
+	private RestTemplate restTemplate = new RestTemplate();
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
 	@RequestMapping(value = "/v1/create-space", method = RequestMethod.POST)
 	public ResponseEntity<String> Create_Space(Model model,
-			@RequestBody String json) throws FileNotFoundException, IOException {
+			@RequestBody String data) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		String uaatoken = getUaaToken();
+		
+	
 		Gson gson = new Gson();
+		String url="";
 		String orgName = "";
 		String orgGuid = "";
 		String spaceName = "";
+		String clientName="";
+	    String authToken="";
+	    String host=env.getProperty("Host-"+clientName);
 		Map<String, String> params = new HashMap<String, String>();
 		ObjectMapper mapper = new ObjectMapper();
-		headers.add("Authorization", uaatoken);
-		headers.add("Content-Type", env.getProperty("Content-Type-json"));
-		headers.add("Accept", env.getProperty("Host"));
-		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
-
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		
+		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
+		authToken=(String) requestParams.get("authToken");
+		clientName =(String) requestParams.get("clientName");
 		orgName = (String) requestParams.get("organizationName");
-		orgGuid = getOrgGuid(orgName);
+		orgGuid = getOrgGuid(orgName,authToken,host);
 		spaceName = (String) requestParams.get("name");
-
-		params.put("name", spaceName);
+        url=env.getProperty("url-" +clientName);
+		
 		params.put("organization_guid", orgGuid);
-
+		
+		for (String key : requestParams.keySet()) {
+			if (key !="authToken"&& key!="clientName" && key!="organizationName" ) {
+				params.put(key, (String) requestParams.get(key));
+			}
+		}
 		String jsonData = gson.toJson(params);
-
+        
+		
+		headers.add("Authorization", authToken);
+		headers.add("Content-Type", env.getProperty("Content-Type-json"));
+		headers.add("Host", host);
 		HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
-		System.out.println(requestEntity);
+		
+		
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -90,23 +105,18 @@ public class ApiController {
 
 	}
 
-	public String getUaaToken() {
-		String token = restTemplate.getForObject(env.getProperty("uaaUrl"),
-				String.class);
-		return token;
-	}
 
-	public String getOrgGuid(String orgName) {
+	public String getOrgGuid(String orgName, String authToken, String host) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:"
 				+ orgName;
-		String uaatoken = getUaaToken();
+		
 		String guid = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
 		JsonObject job = new JsonObject();
-		headers.add("Authorization", uaatoken);
-		headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+		headers.add("Authorization", authToken);
+		headers.add("Host", host);
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
