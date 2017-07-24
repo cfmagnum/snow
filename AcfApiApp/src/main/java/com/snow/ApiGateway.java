@@ -18,12 +18,13 @@ public class ApiGateway {
 	private Environment env;
 	private RestTemplate restTemplate = new RestTemplate();
 	ApplicationInstanceInfo instanceInfo;
-	@RequestMapping(value = "/v1/get-UAA-token", method = RequestMethod.POST)
-	public String getUAAToken(Model model,
+	@RequestMapping(value = "/v1/get-token", method = RequestMethod.POST)
+	public String getToken(Model model,
 			@RequestBody String data)  {
 		model.addAttribute("instanceInfo", instanceInfo);
 		String url = env.getProperty("url-uaa-token-api");
-		return restTemplate.postForObject(url, HttpMethod.POST, String.class, data);
+		System.out.println(url);
+		return restTemplate.postForObject(url,data,String.class);
 	}
 	
 	}
