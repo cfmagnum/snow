@@ -35,7 +35,5 @@ public class ApiGateway {
 		return restTemplate.postForObject(url,data,String.class);
 	}
 	
-	
-	
-	}
+}
 
