@@ -122,7 +122,7 @@ public class ApiGateway {
 	}
 
 	@RequestMapping(value = "/v1/associate-auditor-with-space", method = RequestMethod.POST)
-	public String AssociateAuditorWithSpacee(Model model,
+	public String AssociateAuditorWithSpace(Model model,
 			@RequestBody String data) {
 		model.addAttribute("instanceInfo", instanceInfo);
 		String url = env.getProperty("url-associate-auditor-with-space");
