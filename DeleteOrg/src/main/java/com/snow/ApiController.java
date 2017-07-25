@@ -96,8 +96,7 @@ public class ApiController {
 
 	public String getOrgid(String orgName,String authToken,String host, String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String urlForId = env.getProperty("url-" +clientName)+ "?q=name:"
-				+ orgName;
+		String urlForId = env.getProperty("url-" +clientName)+ "?q=name:" + orgName;
 		
 		String orgId = "";
 		JsonObject resources = new JsonObject();
