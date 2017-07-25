@@ -41,28 +41,35 @@ public class ApiController {
 	@Autowired
 	Environment env;
 
-	RestTemplate restTemplate = new RestTemplate();
+	private RestTemplate restTemplate = new RestTemplate();
 
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
 	@RequestMapping(value = "v1/delete-app", method = RequestMethod.POST)
-	public ResponseEntity<String> deleteApp(Model model,
-			@RequestBody String json) throws JsonParseException,
+	public HttpStatus deleteApp(Model model,
+			@RequestBody String data) throws JsonParseException,
 			JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
+		
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String uaatoken = getUaaToken();
 		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
-		String appName = (String) requestParams.get("app_name");
-		String appGuid = getAppGuid(appName);
-
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com//v2/apps/"
-				+ appGuid;
-		headers.add("Authorization", uaatoken);
-		headers.add("Content-Type", env.getProperty("Content-Type-json"));
-		headers.add("Accept", env.getProperty("Host"));
+		String url ="";
+		String clientName="";
+	    String authToken="";
+	    String host ="";
+	    String appGuid ="";
+		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
+		String appName = (String) requestParams.get("name");
+		authToken=(String) requestParams.get("authToken");
+		clientName =(String) requestParams.get("clientName");
+		host = env.getProperty("Host-"+clientName);
+		appGuid = getAppGuid(appName,authToken,host,clientName);
+		url=env.getProperty("url-" +clientName) + "/" + appGuid;
+		
+		headers.add("Authorization", authToken);
+		headers.add("Content-Type", env.getProperty("Content-Type"));
+		headers.add("Host", host);
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -76,28 +83,23 @@ public class ApiController {
 		});
 		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
 
-		ResponseEntity<String> response = restTemplate.exchange(url,
-				HttpMethod.DELETE, requestEntity, String.class);
+		HttpStatus response = restTemplate.exchange(url,
+				HttpMethod.DELETE, requestEntity, String.class).getStatusCode();
 		return response;
 	}
 
-	public String getUaaToken() {
-		String token = restTemplate.getForObject(env.getProperty("uaaUrl"),
-				String.class);
-		return token;
-	}
-
-	public String getAppGuid(String appName) {
+	
+	public String getAppGuid(String appName, String authToken, String host,String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/apps?q=name:"
+		String url = env.getProperty("url-app-" +clientName)  +"?q=name:"
 				+ appName;
-		String uaatoken = getUaaToken();
+		
 		String guid = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
 		JsonObject job = new JsonObject();
-		headers.add("Authorization", uaatoken);
-		headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+		headers.add("Authorization", authToken);
+		headers.add("Host", host);
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -124,44 +126,6 @@ public class ApiController {
 			guid = metadata.get("guid").getAsString();
 		}
 		return guid;
-	}
-
-	public String getUserUaaId(String userEmailId) {
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users?filter=emails.value eq '"
-				+ userEmailId + "'";
-		String uaatoken = getUaaToken();
-		String UaaId = "";
-		JsonObject resources = new JsonObject();
-		Gson gson = new GsonBuilder().create();
-		JsonObject job = new JsonObject();
-		headers.add("Authorization", uaatoken);
-		headers.add("content-type", "application/json");
-		headers.add("Accept", "application/json");
-		try {
-			skipSslValidation(url);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-		String userinfo = restTemplate.exchange(url, HttpMethod.GET,
-				requestEntity, String.class).getBody();
-		try {
-			job = gson.fromJson(userinfo, JsonObject.class);
-		} catch (JsonSyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		if (job != null) {
-			if (job.getAsJsonArray("resources") != null) {
-				resources = job.getAsJsonArray("resources").get(0)
-						.getAsJsonObject();
-				UaaId = resources.get("id").getAsString();
-			}
-		}
-		return UaaId;
 	}
 
 	public void skipSslValidation(String ConnectionURL) throws Exception {
