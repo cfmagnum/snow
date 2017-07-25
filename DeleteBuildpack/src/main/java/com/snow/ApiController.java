@@ -40,28 +40,36 @@ public class ApiController {
 	@Autowired
 	Environment env;
 
-	RestTemplate restTemplate = new RestTemplate();
+	private RestTemplate restTemplate = new RestTemplate();
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
 	@RequestMapping(value = "/v1/delete-buildpack", method = RequestMethod.POST)
-	public HttpStatus deleteBuildpack(Model model, @RequestBody String json)
+	public HttpStatus deleteBuildpack(Model model, @RequestBody String data)
 			throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
+		
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-
-		String uaatoken = getUaaToken();
 		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
-
-		String buildpackName = (String) requestParams.get("name");
-		String buildpackGuid = getBuildpackGuid(buildpackName);
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/buildpacks/"
+		String url="";
+		String authToken="";
+		String clientName="";
+		String buildpackName="";
+		String buildpackGuid ="";
+		String host="";
+		Map<String, Object> requestParams;
+		requestParams = mapper.readValue(data, Map.class);
+		authToken= (String) requestParams.get("authToken");
+		clientName=(String) requestParams.get("clientName");     
+		 buildpackName = (String) requestParams.get("name");
+		 host=env.getProperty("Host-"+clientName);
+		 buildpackGuid = getBuildpackGuid(buildpackName,authToken,host,clientName);
+		 url = env.getProperty("url-" +clientName) + "/"
 				+ buildpackGuid;
 
-		headers.add("Authorization", uaatoken);
+		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
-		headers.add("Host", env.getProperty("Host"));
+		headers.add("Host", host);
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -77,27 +85,23 @@ public class ApiController {
 
 		HttpStatus response = restTemplate.exchange(url, HttpMethod.DELETE,
 				requestEntity, String.class).getStatusCode();
-		System.out.println(response);
+		
 		return response;
 	}
 
-	public String getUaaToken() {
-		String token = restTemplate.getForObject(env.getProperty("uaaUrl"),
-				String.class);
-		return token;
-	}
 
-	public String getBuildpackGuid(String buildpackName) {
+	public String getBuildpackGuid(String buildpackName,String authToken,String host, String clientName
+			) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/buildpacks?q=name:"
+		String url = env.getProperty("url-" +clientName) + "?q=name:"
 				+ buildpackName;
-		String uaatoken = getUaaToken();
+	
 		String guid = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
 		JsonObject job = new JsonObject();
-		headers.add("Authorization", uaatoken);
-		headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+		headers.add("Authorization", authToken);
+		headers.add("Host", host);
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
