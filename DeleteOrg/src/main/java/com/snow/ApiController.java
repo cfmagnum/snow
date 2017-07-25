@@ -40,28 +40,41 @@ public class ApiController {
 	@Autowired
 	Environment env;
 
-	private String orgurl = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations";
+	
 
 	RestTemplate restTemplate = new RestTemplate();
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
 	@RequestMapping(value = "/v1/delete-org", method = RequestMethod.POST)
-	public ResponseEntity<String> DeleteOrg(Model model,
-			@RequestBody String json) throws FileNotFoundException, IOException {
+	public HttpStatus DeleteOrg(Model model,
+			@RequestBody String data) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		MultiValueMap<String, String> orgheaders = new LinkedMultiValueMap<String, String>();
-		String uaatoken = getUaaToken();
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		String url="";
+		String authToken="";
+		String clientName="";
+		String orgName="";
+		String host ="";
+		String orgId ="";
 		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
-		String orgName = (String) requestParams.get("name");
-		String orgId = getOrgid(orgName);
-		String urlfordelete = orgurl + "/" + orgId;
-		orgheaders.add("Authorization", uaatoken);
-		orgheaders.add("Content-Type", env.getProperty("Content-Type-json"));
-		orgheaders.add("Host", env.getProperty("Host"));
+		Map<String, Object> requestParams;
+		
+		requestParams = mapper.readValue(data, Map.class);
+		authToken= (String) requestParams.get("authToken");
+		clientName=(String) requestParams.get("clientName");
+		host=env.getProperty("Host-"+clientName);
+		orgName = (String) requestParams.get("name");
+		orgId = getOrgid(orgName,authToken,host,clientName);
+		
+		url= env.getProperty("url-" +clientName) + "/" + orgId;
+		
+		headers.add("Authorization", authToken);
+		headers.add("Content-Type", env.getProperty("Content-Type-json"));
+		headers.add("Host", env.getProperty("Host"));
+		
 		try {
-			skipSslValidation(orgurl);
+			skipSslValidation(url);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -72,32 +85,26 @@ public class ApiController {
 			}
 		});
 		HttpEntity<String> requestEntity = new HttpEntity<>("Headers",
-				orgheaders);
-		// HttpEntity<Map<String, Object>> httpEntity = new
-		// HttpEntity<>(requestParams, orgheaders);
-
-		ResponseEntity<String> response = restTemplate.exchange(urlfordelete,
-				HttpMethod.DELETE, requestEntity, String.class);
+				headers);
+		
+		HttpStatus response = restTemplate.exchange(url,
+				HttpMethod.DELETE, requestEntity, String.class).getStatusCode();
 		return response;
 	}
 
-	public String getUaaToken() {
-		String token = restTemplate.getForObject(env.getProperty("uaaUrl"),
-				String.class);
-		return token;
-	}
+	
 
-	public String getOrgid(String orgName) {
+	public String getOrgid(String orgName,String authToken,String host, String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String urlForId = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:"
+		String urlForId = env.getProperty("url-" +clientName)+ "?q=name:"
 				+ orgName;
-		String uaatoken = getUaaToken();
+		
 		String orgId = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
 		JsonObject job = new JsonObject();
-		headers.add("Authorization", uaatoken);
-		headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+		headers.add("Authorization", authToken);
+		headers.add("Host", host);
 		try {
 			skipSslValidation(urlForId);
 		} catch (Exception e) {
