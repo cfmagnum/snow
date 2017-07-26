@@ -52,30 +52,53 @@ public class ApiController {
 			JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String uaatoken = getUaaToken();
 
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
+		String orgName = "";
+		String orgGuid = "";
+		String userEmailId = "";
+		String uaaId = "";
+		String url = "";
+		String authToken = "";
+		String clientName = "";
+		String host = "";
+		String spaceName = "";
+		String spaceGuid = "";
 
-		String orgName = (String) requestParams.get("organizationName");
-		String orgGuid = getOrgGuid(orgName);
-		String spaceName = (String) requestParams.get("spaceName");
-		String userEmailId = (String) requestParams.get("userEmailId");
+		authToken = (String) requestParams.get("authToken");
+		clientName = (String) requestParams.get("clientName");
+		host = env.getProperty("Host-" + clientName);
+		orgName = (String) requestParams.get("organizationName");
+
+		orgGuid = getOrgGuid(orgName, authToken, host, clientName);
+		System.out.println(orgGuid);
+		userEmailId = (String) requestParams.get("userEmailId");
+		System.out.println(userEmailId);
+		spaceName = (String) requestParams.get("spaceName");
+
+		System.out.println(spaceName);
+		spaceGuid = getSpaceGuid(spaceName, orgGuid, authToken, host,
+				clientName);
+		System.out.println(spaceGuid);
+		uaaId = getUserUaaId(userEmailId, authToken, clientName);
+		System.out.println(uaaId);
 
 		Gson gson = new Gson();
 
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("userEmailId", userEmailId);
 
-		String spaceGuid = getSpaceGuid(orgGuid, spaceName);
-		String uaaId = getUserUaaId(userEmailId);
+		spaceGuid = getSpaceGuid(spaceName, orgGuid, authToken, host,
+				clientName);
+		System.out.println(spaceGuid);
+		uaaId = getUserUaaId(userEmailId, authToken, clientName);
 
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/users/"
-				+ uaaId + "/spaces/" + spaceGuid;
-
-		headers.add("Authorization", uaatoken);
+		url = env.getProperty("url-users-" + clientName) + "/" + uaaId
+				+ "/spaces/" + spaceGuid;
+		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
-		headers.add("Accept", env.getProperty("Host"));
+		headers.add("Host", env.getProperty("Host-" + clientName));
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -100,24 +123,57 @@ public class ApiController {
 
 	}
 
-	public String getUaaToken() {
-		String token = restTemplate.getForObject(env.getProperty("uaaUrl"),
-				String.class);
-		return token;
-	}
-
-	public String getOrgGuid(String orgName) {
-	
+	public String getOrgGuid(String orgName, String authToken, String host,
+			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:"
+		String urlForId = env.getProperty("url-" + clientName) + "?q=name:"
 				+ orgName;
-		String uaatoken = getUaaToken();
+
+		String orgId = "";
+		JsonObject resources = new JsonObject();
+		Gson gson = new GsonBuilder().create();
+		JsonObject job = new JsonObject();
+		headers.add("Authorization", authToken);
+		headers.add("Host", host);
+		try {
+			skipSslValidation(urlForId);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
+		String orgInfo = restTemplate.exchange(urlForId, HttpMethod.GET,
+				requestEntity, String.class).getBody();
+		try {
+			job = gson.fromJson(orgInfo, JsonObject.class);
+		} catch (JsonSyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		if (job != null) {
+			if (job.getAsJsonArray("resources") != null) {
+				resources = job.getAsJsonArray("resources").get(0)
+						.getAsJsonObject();
+			}
+			JsonObject metadata = resources.get("metadata").getAsJsonObject();
+			orgId = metadata.get("guid").getAsString();
+		}
+		return orgId;
+	}
+
+	public String getSpaceGuid(String spaceName, String orgGuid,
+			String authToken, String host, String clientName) {
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		String url = env.getProperty("url-" + clientName) + "/" + orgGuid
+				+ "/spaces" + "?q=name:" + spaceName;
+
 		String guid = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
 		JsonObject job = new JsonObject();
-		headers.add("Authorization", uaatoken);
-		headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+		headers.add("Authorization", authToken);
+		headers.add("Host", host);
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -143,60 +199,21 @@ public class ApiController {
 			JsonObject metadata = resources.get("metadata").getAsJsonObject();
 			guid = metadata.get("guid").getAsString();
 		}
-		return guid;
-	}
-
-	public String getSpaceGuid(String orgGuid, String spaceName) {
-	
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations/"
-				+ orgGuid + "/spaces" + "?q=name:" + spaceName;
-		String uaatoken = getUaaToken();
-		String guid = "";
-		JsonObject resources = new JsonObject();
-		Gson gson = new GsonBuilder().create();
-		JsonObject job = new JsonObject();
-		headers.add("Authorization", uaatoken);
-		headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
-		try {
-			skipSslValidation(url);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-		String orgInfo = restTemplate.exchange(url, HttpMethod.GET,
-				requestEntity, String.class).getBody();
-		try {
-			job = gson.fromJson(orgInfo, JsonObject.class);
-		} catch (JsonSyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		if (job != null) {
-			if (job.getAsJsonArray("resources") != null) {
-				resources = job.getAsJsonArray("resources").get(0)
-						.getAsJsonObject();
-			}
-
-			JsonObject metadata = resources.get("metadata").getAsJsonObject();
-			guid = metadata.get("guid").getAsString();
-		}
 
 		return guid;
 	}
 
-	public String getUserUaaId(String userEmailId) {
+	public String getUserUaaId(String userEmailId, String authToken,
+			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users?filter=emails.value eq '"
-				+ userEmailId + "'";
-		String uaatoken = getUaaToken();
+		String url = env.getProperty("url-users-" + clientName)
+				+ "?filter=emails.value eq '" + userEmailId + "'";
+
 		String UaaId = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
 		JsonObject job = new JsonObject();
-		headers.add("Authorization", uaatoken);
+		headers.add("Authorization", authToken);
 		headers.add("content-type", "application/json");
 		headers.add("Accept", "application/json");
 		try {
