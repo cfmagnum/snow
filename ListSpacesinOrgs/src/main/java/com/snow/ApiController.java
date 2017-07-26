@@ -47,27 +47,35 @@ public class ApiController {
 
 	@RequestMapping(value = "/v1/list-spaces", method = RequestMethod.POST)
 	public ResponseEntity<String> associateUserWithOrg(Model model,
-			@RequestBody String json) throws JsonParseException,
+			@RequestBody String data) throws JsonParseException,
 			JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String uaatoken = getUaaToken();
-
-		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
+	
+		String url="";
+	    String clientName="";
+	    String authToken="";
+	    String orgName ="";
+	    String orgGuid="";
+	    String host ="";
+	    ObjectMapper mapper = new ObjectMapper();
+	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+	    Map<String, Object> requestParams = mapper.readValue(data, Map.class);
+	    authToken=(String) requestParams.get("authToken");
+		clientName =(String) requestParams.get("clientName");
+		host=env.getProperty("Host-"+clientName);
+		
 
 		HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(
 				requestParams, headers);
 
-		String orgName = (String) requestParams.get("organizationName");
-		String orgGuid = getOrgGuid(orgName);
-		System.out.println(orgGuid);
+		orgName = (String) requestParams.get("organizationName");
+		orgGuid = getOrgGuid(orgName,authToken,host,clientName);
+		
 
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations/"
-				+ orgGuid + "/spaces";
-		headers.add("Authorization", uaatoken);
+		url = env.getProperty("url-" +clientName) + "/" + orgGuid + "/spaces";
+		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
-		headers.add("Accept", env.getProperty("Host"));
+		headers.add("Accept", host);
 
 		try {
 			skipSslValidation(url);
@@ -93,25 +101,24 @@ public class ApiController {
 		return token;
 	}
 
-	public String getOrgGuid(String orgName) {
+	public String getOrgGuid(String orgName,String authToken,String host, String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:"
-				+ orgName;
-		String uaatoken = getUaaToken();
-		String guid = "";
+		String urlForId = env.getProperty("url-" +clientName)+ "?q=name:" + orgName;
+		
+		String orgId = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
 		JsonObject job = new JsonObject();
-		headers.add("Authorization", uaatoken);
-		headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+		headers.add("Authorization", authToken);
+		headers.add("Host", host);
 		try {
-			skipSslValidation(url);
+			skipSslValidation(urlForId);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-		String orgInfo = restTemplate.exchange(url, HttpMethod.GET,
+		String orgInfo = restTemplate.exchange(urlForId, HttpMethod.GET,
 				requestEntity, String.class).getBody();
 		try {
 			job = gson.fromJson(orgInfo, JsonObject.class);
@@ -125,12 +132,12 @@ public class ApiController {
 				resources = job.getAsJsonArray("resources").get(0)
 						.getAsJsonObject();
 			}
-			System.out.println(resources);
 			JsonObject metadata = resources.get("metadata").getAsJsonObject();
-			guid = metadata.get("guid").getAsString();
+			orgId = metadata.get("guid").getAsString();
 		}
-		return guid;
+		return orgId;
 	}
+
 
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {

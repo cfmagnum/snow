@@ -135,7 +135,7 @@ public class ApiController {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		String url =  env.getProperty("url-users-" +clientName)+"?filter=emails.value eq '"
 				+ userEmailId + "'";
-		System.out.println(url);
+		
 		String UaaId = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
