@@ -3,6 +3,7 @@ package com.snow;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
@@ -40,26 +41,40 @@ public class ApiController {
 	@Autowired
 	Environment env;
 
-	private String url = "";
-	private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+	
 	RestTemplate restTemplate = new RestTemplate();
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
 	@RequestMapping(value = "/v1/delete-user", method = RequestMethod.POST)
-	public ResponseEntity<String> Create_User(Model model,
-			@RequestBody String json) throws FileNotFoundException, IOException {
+	public HttpStatus Create_User(Model model,
+			@RequestBody String data) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		String uaatoken = getUaaToken();
-
-		headers.add("Authorization", uaatoken);
-		headers.add("Content-Type", env.getProperty("Content-Type-json"));
-		headers.add("Accept", env.getProperty("Host"));
+		
+		String url="";
+	    String clientName="";
+	    String authToken="";
+	    String userEmailId ="";
+	    String uaaId ="";
+	    String host ="";
 		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
-		String userEmailId = (String) requestParams.get("userEmailId");
-		String uaaId = getUserUaaId(userEmailId);
-		url = "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users/" + uaaId;
+		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		Map<String, Object> params = new HashMap<String, Object>();
+		
+		authToken=(String) requestParams.get("authToken");
+		clientName =(String) requestParams.get("clientName");
+		host=env.getProperty("Host-"+clientName);
+		userEmailId = (String) requestParams.get("userEmailId");
+		uaaId = getUserUaaId(userEmailId,authToken,clientName);
+        url=env.getProperty("url-" +clientName) + "/" + uaaId;
+
+		headers.add("Authorization", authToken);
+		headers.add("Content-Type", env.getProperty("Content-Type-json"));
+		headers.add("Accept", host);
+		
+	   
+		
 		HttpEntity<String> httpEntity = new HttpEntity<>("Headers", headers);
 		try {
 			skipSslValidation(url);
@@ -73,7 +88,7 @@ public class ApiController {
 			}
 		});
 		return restTemplate.exchange(url, HttpMethod.DELETE, httpEntity,
-				String.class);
+				String.class).getStatusCode();
 
 	}
 
@@ -109,22 +124,18 @@ public class ApiController {
 
 	}
 
-	public String getUaaToken() {
-		String token = restTemplate.getForObject(env.getProperty("uaaUrl"),
-				String.class);
-		return token;
-	}
 
-	public String getUserUaaId(String userEmailId) {
+
+	public String getUserUaaId(String userEmailId, String authToken,String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users?filter=emails.value eq '"
+		String url =  env.getProperty("url-users-" +clientName)+"?filter=emails.value eq '"
 				+ userEmailId + "'";
-		String uaatoken = getUaaToken();
+		System.out.println(url);
 		String UaaId = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
 		JsonObject job = new JsonObject();
-		headers.add("Authorization", uaatoken);
+		headers.add("Authorization", authToken);
 		headers.add("content-type", "application/json");
 		headers.add("Accept", "application/json");
 		try {
