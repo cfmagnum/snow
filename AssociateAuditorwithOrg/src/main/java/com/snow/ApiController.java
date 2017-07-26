@@ -70,7 +70,6 @@ public class ApiController {
 		orgGuid = getOrgGuid(orgName,authToken,host,clientName);
 		userEmailId = (String) requestParams.get("userEmailId");
 		uaaId = getUserUaaId(userEmailId,authToken,clientName);
-		System.out.println(uaaId);
 		url = env.getProperty("url-" +clientName) + "/" + orgGuid + "/auditors/" + uaaId;
 		System.out.println(url);
 		headers.add("Authorization", authToken);
@@ -98,7 +97,7 @@ public class ApiController {
 	public String getOrgGuid(String orgName,String authToken,String host, String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		String urlForId = env.getProperty("url-" +clientName)+ "?q=name:" + orgName;
-		System.out.println(urlForId);
+		
 		String orgId = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
@@ -134,8 +133,6 @@ public class ApiController {
 
 	public String getUserUaaId(String userEmailId, String authToken,String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		System.out.println("inside uaa method");
-		System.out.println(env.getProperty("url-users-" +clientName));
 		String url =  env.getProperty("url-users-" +clientName)+"?filter=emails.value eq '"
 				+ userEmailId + "'";
 		System.out.println(url);
