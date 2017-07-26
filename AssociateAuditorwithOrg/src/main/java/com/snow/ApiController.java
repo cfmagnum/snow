@@ -65,6 +65,7 @@ public class ApiController {
 		requestParams = mapper.readValue(data, Map.class);
 		authToken= (String) requestParams.get("authToken");
 		clientName=(String) requestParams.get("clientName");
+		host=env.getProperty("Host-"+clientName);
 		orgName = (String) requestParams.get("organizationName");
 		orgGuid = getOrgGuid(orgName,authToken,host,clientName);
 		userEmailId = (String) requestParams.get("userEmailId");
