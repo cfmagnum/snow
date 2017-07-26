@@ -61,14 +61,14 @@ public class ApiController {
 		String url="";
 		String authToken="";
 		String clientName="";
-		
+		String host ="";
 		requestParams = mapper.readValue(data, Map.class);
 		authToken= (String) requestParams.get("authToken");
 		clientName=(String) requestParams.get("clientName");
 		orgName = (String) requestParams.get("organizationName");
-		orgGuid = getOrgGuid(orgName,authToken);
+		orgGuid = getOrgGuid(orgName,authToken,host,clientName);
 		userEmailId = (String) requestParams.get("userEmailId");
-		uaaId = getUserUaaId(userEmailId,authToken);
+		uaaId = getUserUaaId(userEmailId,authToken,clientName);
 		
 		url = env.getProperty("url-" +clientName) + orgGuid + "/auditors/" + uaaId;
 		
@@ -94,25 +94,23 @@ public class ApiController {
 	}
 
 
-	public String getOrgGuid(String orgName, String authToken) {
+	public String getOrgGuid(String orgName,String authToken,String host, String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:"
-				+ orgName;
-		
-		String guid = "";
+		String urlForId = env.getProperty("url-" +clientName)+ "?q=name:" + orgName;
+		String orgId = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
 		JsonObject job = new JsonObject();
 		headers.add("Authorization", authToken);
-		headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+		headers.add("Host", host);
 		try {
-			skipSslValidation(url);
+			skipSslValidation(urlForId);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-		String orgInfo = restTemplate.exchange(url, HttpMethod.GET,
+		String orgInfo = restTemplate.exchange(urlForId, HttpMethod.GET,
 				requestEntity, String.class).getBody();
 		try {
 			job = gson.fromJson(orgInfo, JsonObject.class);
@@ -126,18 +124,17 @@ public class ApiController {
 				resources = job.getAsJsonArray("resources").get(0)
 						.getAsJsonObject();
 			}
-			
 			JsonObject metadata = resources.get("metadata").getAsJsonObject();
-			guid = metadata.get("guid").getAsString();
+			orgId = metadata.get("guid").getAsString();
 		}
-		return guid;
+		return orgId;
 	}
 
-	public String getUserUaaId(String userEmailId, String authToken) {
+	public String getUserUaaId(String userEmailId, String authToken,String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users?filter=emails.value eq '"
+		String url =  env.getProperty("url-users-" +clientName)+"?filter=emails.value eq '"
 				+ userEmailId + "'";
-		
+		System.out.println(url);
 		String UaaId = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
