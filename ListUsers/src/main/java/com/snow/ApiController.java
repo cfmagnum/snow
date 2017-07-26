@@ -3,6 +3,7 @@ package com.snow;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -20,32 +21,47 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @RestController
 public class ApiController {
 	@Autowired
 	Environment env;
-	private String url = "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users";
-	private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 
-	RestTemplate restTemplate = new RestTemplate();
+	 
+
+	private RestTemplate restTemplate = new RestTemplate();
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
-	@RequestMapping(value = "/v1/list-users", method = RequestMethod.GET)
-	public ResponseEntity<String> getUsers(Model model)
+	@RequestMapping(value = "/v1/list-users", method = RequestMethod.POST)
+	public ResponseEntity<String> getUsers(Model model,@RequestBody String data)
 			throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-
-		String uaatoken = restTemplate.getForObject(env.getProperty("uaaUrl"),
-				String.class);
-		headers.add("Authorization", uaatoken);
+        
+		String url="";
+		String authToken="";
+		String clientName="";
+		
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> requestParams;
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		requestParams = mapper.readValue(data, Map.class);
+		authToken= (String) requestParams.get("authToken");
+		clientName=(String) requestParams.get("clientName");
+		
+		url=env.getProperty("url-" +clientName);
+		System.out.println(url);
+		headers.add("Authorization", authToken);
 		headers.add("Accept", env.getProperty("Content-Type-json"));
 		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
+		
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
