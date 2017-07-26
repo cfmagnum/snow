@@ -54,19 +54,29 @@ public class ApiController {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
-		String uaatoken = getUaaToken();
+		String orgName = "";
+		String orgGuid = "";
+		String userEmailId = "";
+		String uaaId = "";
+		String url = "";
+		String authToken = "";
+		String clientName = "";
+		String host = "";
 
-		String orgName = (String) requestParams.get("organizationName");
-		String orgGuid = getOrgGuid(orgName);
+		authToken = (String) requestParams.get("authToken");
+		clientName = (String) requestParams.get("clientName");
+		host = env.getProperty("Host-" + clientName);
+		orgName = (String) requestParams.get("organizationName");
+		orgGuid = getOrgGuid(orgName, authToken, host, clientName);
+		userEmailId = (String) requestParams.get("userEmailId");
+		uaaId = getUserUaaId(userEmailId, authToken, clientName);
 
-		String userEmailId = (String) requestParams.get("userEmailId");
-		String uaaId = getUserUaaId(userEmailId);
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/users/"
-				+ uaaId + "/organizations/" + orgGuid;
-	
-		headers.add("Authorization", uaatoken);
+		url = env.getProperty("url-users-" + clientName) + "/" + uaaId
+				+ "/organizations/" + orgGuid;
+
+		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
-		headers.add("Accept", env.getProperty("Host"));
+		headers.add("Host", env.getProperty("Host-" + clientName));
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -85,31 +95,26 @@ public class ApiController {
 		return response;
 	}
 
-	public String getUaaToken() {
-		String token = restTemplate.getForObject(env.getProperty("uaaUrl"),
-				String.class);
-		return token;
-	}
-
-	public String getOrgGuid(String orgName) {
+	public String getOrgGuid(String orgName, String authToken, String host,
+			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:"
+		String urlForId = env.getProperty("url-" + clientName) + "?q=name:"
 				+ orgName;
-		String uaatoken = getUaaToken();
-		String guid = "";
+
+		String orgId = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
 		JsonObject job = new JsonObject();
-		headers.add("Authorization", uaatoken);
-		headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+		headers.add("Authorization", authToken);
+		headers.add("Host", host);
 		try {
-			skipSslValidation(url);
+			skipSslValidation(urlForId);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-		String orgInfo = restTemplate.exchange(url, HttpMethod.GET,
+		String orgInfo = restTemplate.exchange(urlForId, HttpMethod.GET,
 				requestEntity, String.class).getBody();
 		try {
 			job = gson.fromJson(orgInfo, JsonObject.class);
@@ -123,23 +128,23 @@ public class ApiController {
 				resources = job.getAsJsonArray("resources").get(0)
 						.getAsJsonObject();
 			}
-
 			JsonObject metadata = resources.get("metadata").getAsJsonObject();
-			guid = metadata.get("guid").getAsString();
+			orgId = metadata.get("guid").getAsString();
 		}
-		return guid;
+		return orgId;
 	}
 
-	public String getUserUaaId(String userEmailId) {
+	public String getUserUaaId(String userEmailId, String authToken,
+			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users?filter=emails.value eq '"
-				+ userEmailId + "'";
-		String uaatoken = getUaaToken();
+		String url = env.getProperty("url-users-" + clientName)
+				+ "?filter=emails.value eq '" + userEmailId + "'";
+
 		String UaaId = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
 		JsonObject job = new JsonObject();
-		headers.add("Authorization", uaatoken);
+		headers.add("Authorization", authToken);
 		headers.add("content-type", "application/json");
 		headers.add("Accept", "application/json");
 		try {
