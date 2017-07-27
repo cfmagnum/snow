@@ -48,30 +48,31 @@ public class ApiController {
 
 	@RequestMapping(value = "/v1/update-quota-size-of-space", method = RequestMethod.POST)
 	public ResponseEntity<String> updateQuotaSizeOfSpace(Model model,
-			@RequestBody String json) throws FileNotFoundException, IOException {
+			@RequestBody String data) throws FileNotFoundException, IOException {
 
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-
-		// Map<String, Object> uriVariables = new Hashmap<String, Object>();
+		String authToken="";
+		String clientName="";
+		String host ="";
 		String spaceName = "";
-		String uaatoken = "";
 		String quota_definition_guid = "";
 		String url = "";
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> params = new HashMap<String, Object>();
-		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
-		uaatoken = getUaaToken();
+		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
+		authToken= (String) requestParams.get("authToken");
+		clientName=(String) requestParams.get("clientName");
+		host=env.getProperty("Host-"+clientName);
 		spaceName = (String) requestParams.get("spaceName");
-		quota_definition_guid = getQuotaDefinitionGuid(spaceName);
-		System.out.println(spaceName);
-
-		url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/space_quota_definitions/"
-				+ quota_definition_guid;
-		headers.add("Authorization", uaatoken);
+		quota_definition_guid = getQuotaDefinitionGuid(spaceName,authToken,host,clientName);
+		System.out.println(quota_definition_guid);
+		url = env.getProperty("url-" +clientName) +"/" + quota_definition_guid;
+		  System.out.println(url);
+		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
-		headers.add("Accept", env.getProperty("Host"));
-		System.out.println(url);
+		headers.add("Accept", host);
+		
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -85,7 +86,7 @@ public class ApiController {
 		});
 
 		for (String key : requestParams.keySet()) {
-			if (key != "spaceName") {
+			if (key != "spaceName" && key !="authToken" && key!="clientName") {
 				params.put(key, requestParams.get(key));
 			}
 		}
@@ -93,33 +94,25 @@ public class ApiController {
 		String jsonData = gson.toJson(params);
 		HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
 
-		// System.out.println(params);
+		
 		ResponseEntity<String> response = restTemplate.exchange(url,
 				HttpMethod.PUT, requestEntity, String.class);
 		return response;
 	}
 
-	public String getUaaToken() {
-		String token = restTemplate.getForObject(env.getProperty("uaaUrl"),
-				String.class);
-		System.out.println(token);
-		return token;
-	}
+	
 
-	public String getQuotaDefinitionGuid(String spaceName) {
+	public String getQuotaDefinitionGuid(String spaceName, String authToken,String host, String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/spaces?q=name:"
-				+ spaceName;
+		String url = env.getProperty("url-space-" +clientName) + "?q=name:"  + spaceName;
 		System.out.println(url);
-
-		String uaatoken = getUaaToken();
 		String quota_definition_guid = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
 		JsonObject job = new JsonObject();
-		headers.add("Authorization", uaatoken);
-		headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+		headers.add("Authorization", authToken);
+		headers.add("Host", host);
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -127,9 +120,11 @@ public class ApiController {
 			e.printStackTrace();
 		}
 		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-		System.out.println(requestEntity);
+		
 		String orgInfo = restTemplate.exchange(url, HttpMethod.GET,
 				requestEntity, String.class).getBody();
+		System.out.println("orginfo" + orgInfo);
+		
 		try {
 			job = gson.fromJson(orgInfo, JsonObject.class);
 		} catch (JsonSyntaxException e) {
@@ -144,7 +139,7 @@ public class ApiController {
 			}
 
 			JsonObject metadata = resources.get("entity").getAsJsonObject();
-			System.out.println(metadata);
+		
 			quota_definition_guid = metadata.get("space_quota_definition_guid")
 					.getAsString();
 		}
