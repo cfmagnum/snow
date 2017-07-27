@@ -3,6 +3,9 @@ package com.snow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -194,6 +197,9 @@ public class ApiGateway {
 	public String DeleteUser(Model model, @RequestBody String data) {
 		model.addAttribute("instanceInfo", instanceInfo);
 		String url = env.getProperty("url-delete-user");
+		HttpEntity<String> requestEntity = new HttpEntity<>(data);
+		//return restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+		//return (String) restTemplate.postForEntity(url, data, String.class);
 		return restTemplate.postForObject(url, data, String.class);
 	}
 
@@ -212,10 +218,15 @@ public class ApiGateway {
 	}
 
 	@RequestMapping(value = "/v1/list-Organizations", method = RequestMethod.POST)
-	public String ListOrganizations(Model model, @RequestBody String data) {
+	public ResponseEntity<String> ListOrganizations(Model model, @RequestBody String data) {
 		model.addAttribute("instanceInfo", instanceInfo);
 		String url = env.getProperty("url-list-Organizations");
-		return restTemplate.postForObject(url, data, String.class);
+		
+		HttpEntity<String> requestEntity = new HttpEntity<>(data);
+		System.out.println(requestEntity);
+		return restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+		//return restTemplate.postForEntity(url, data, String.class);
+		//return restTemplate.postForObject(url, data, String.class);
 	}
 
 	@RequestMapping(value = "/v1/list-spaces", method = RequestMethod.POST)
