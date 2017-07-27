@@ -43,7 +43,7 @@ public class ApiGateway {
 		model.addAttribute("instanceInfo", instanceInfo);
 		String url = env.getProperty("url-delete-buildpack");
 		HttpEntity<String> requestEntity = new HttpEntity<>(data);
-		return restTemplate.exchange(url, HttpMethod.DELETE, requestEntity,
+		return restTemplate.exchange(url, HttpMethod.POST, requestEntity,
 				String.class).getStatusCode();
 
 	}
@@ -63,7 +63,7 @@ public class ApiGateway {
 		model.addAttribute("instanceInfo", instanceInfo);
 		String url = env.getProperty("url-delete-app-instance-data");
 		HttpEntity<String> requestEntity = new HttpEntity<>(data);
-		return restTemplate.exchange(url, HttpMethod.DELETE, requestEntity,
+		return restTemplate.exchange(url, HttpMethod.POST, requestEntity,
 				String.class).getStatusCode();
 	}
 
@@ -145,7 +145,7 @@ public class ApiGateway {
 		model.addAttribute("instanceInfo", instanceInfo);
 		String url = env.getProperty("url-delete-org");
 		HttpEntity<String> requestEntity = new HttpEntity<>(data);
-		return restTemplate.exchange(url, HttpMethod.DELETE, requestEntity,
+		return restTemplate.exchange(url, HttpMethod.POST, requestEntity,
 				String.class).getStatusCode();
 	}
 
@@ -256,7 +256,7 @@ public class ApiGateway {
 		model.addAttribute("instanceInfo", instanceInfo);
 		String url = env.getProperty("url-delete-user");
 		HttpEntity<String> requestEntity = new HttpEntity<>(data);
-		return restTemplate.exchange(url, HttpMethod.DELETE, requestEntity,
+		return restTemplate.exchange(url, HttpMethod.POST, requestEntity,
 				String.class).getStatusCode();
 
 	}
