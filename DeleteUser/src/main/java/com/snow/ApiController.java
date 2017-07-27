@@ -47,7 +47,7 @@ public class ApiController {
 	ApplicationInstanceInfo instanceInfo;
 
 	@RequestMapping(value = "/v1/delete-user", method = RequestMethod.POST)
-	public HttpStatus Create_User(Model model,
+	public HttpStatus delete_User(Model model,
 			@RequestBody String data) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
 		

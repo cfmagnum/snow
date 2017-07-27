@@ -5,14 +5,12 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
 import org.springframework.core.env.Environment;
@@ -66,9 +64,7 @@ public class ApiController {
 		host=env.getProperty("Host-"+clientName);
 		spaceName = (String) requestParams.get("spaceName");
 		quota_definition_guid = getQuotaDefinitionGuid(spaceName,authToken,host,clientName);
-		System.out.println(quota_definition_guid);
 		url = env.getProperty("url-" +clientName) +"/" + quota_definition_guid;
-		  System.out.println(url);
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
 		headers.add("Accept", host);
@@ -106,7 +102,6 @@ public class ApiController {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 
 		String url = env.getProperty("url-space-" +clientName) + "?q=name:"  + spaceName;
-		System.out.println(url);
 		String quota_definition_guid = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
@@ -123,7 +118,6 @@ public class ApiController {
 		
 		String orgInfo = restTemplate.exchange(url, HttpMethod.GET,
 				requestEntity, String.class).getBody();
-		System.out.println("orginfo" + orgInfo);
 		
 		try {
 			job = gson.fromJson(orgInfo, JsonObject.class);
