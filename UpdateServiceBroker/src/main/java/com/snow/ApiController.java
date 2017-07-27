@@ -47,39 +47,31 @@ public class ApiController {
 
 	@RequestMapping(value = "/v1/update-service-broker", method = RequestMethod.POST)
 	public ResponseEntity<String> updateServiceBroker(Model model,
-			@RequestBody String json) throws FileNotFoundException, IOException {
+			@RequestBody String data) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		System.getProperties().put("http.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("http.proxyPort", "84");
-		System.getProperties().put("https.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("https.proxyPort", "84");
+	
 
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		// Map<String, Object> uriVariables = new Hashmap<String, Object>();
+	
 		String name = "";
-		String uaatoken = "";
 		String guid = "";
-		String url = "";
-		String broker_url = "";
-		String auth_username = "";
-		String auth_password = "";
+		String url="";
+		String authToken = "";
+		String clientName = "";
+		String host = "";
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> params = new HashMap<String, Object>();
-		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
-		uaatoken = getUaaToken();
+		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
+		authToken = (String) requestParams.get("authToken");
+		clientName = (String) requestParams.get("clientName");
+		host = env.getProperty("Host-" + clientName);
 		name = (String) requestParams.get("name");
-		broker_url = (String) requestParams.get("broker_url");
-		auth_username = (String) requestParams.get("auth_username");
-		auth_password = (String) requestParams.get("auth_password");
-		guid = getServiceBrokerGuid(name);
+		guid = getServiceBrokerGuid(name,authToken,host,clientName);
 
-		url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/service_brokers/"
-				+ guid;
-		headers.add("Authorization", uaatoken);
+		url=env.getProperty("url-" +clientName) + "/" + guid;
+		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
-		headers.add("Accept", env.getProperty("Host"));
+		headers.add("Accept", host);
 
 		try {
 			skipSslValidation(url);
@@ -114,18 +106,17 @@ public class ApiController {
 		return token;
 	}
 
-	public String getServiceBrokerGuid(String name) {
+	public String getServiceBrokerGuid(String name,String authToken,String host, String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/service_brokers?q=name:"
-				+ name;
+		String url = env.getProperty("url-" +clientName)+"?q=name:" + name;
 		System.out.println(url);
-		String uaatoken = getUaaToken();
+		
 		String guid = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
 		JsonObject job = new JsonObject();
-		headers.add("Authorization", uaatoken);
-		headers.add("Host", "api.sys.eu.cfdev.canopy-cloud.com");
+		headers.add("Authorization", authToken);
+		headers.add("Host", host);
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
