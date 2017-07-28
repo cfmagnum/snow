@@ -3,6 +3,7 @@ package com.snow;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
@@ -30,32 +31,47 @@ import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 @RestController
 public class ApiController {
 	@Autowired
 	Environment env;
 	private String url = "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users";
-	private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+	
 
 	RestTemplate restTemplate = new RestTemplate();
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
+	private Gson gson = new Gson();
 
 	@RequestMapping(value = "/v1/create-user", method = RequestMethod.POST)
 	public ResponseEntity<String> Create_User(Model model,
 			@RequestBody String json) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		String uaatoken = restTemplate.getForObject(env.getProperty("uaaUrl"),
-				String.class);
-		headers.add("Authorization", uaatoken);
-		headers.add("Content-Type", env.getProperty("Content-Type-json"));
-		headers.add("Accept", env.getProperty("Host"));
-		ObjectMapper mapper = new ObjectMapper();
+		String url="";
+	    String clientName="";
+	    String authToken="";
+	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+	    ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
-
-		HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(
-				requestParams, headers);
+	    authToken=(String) requestParams.get("authToken");
+		clientName =(String) requestParams.get("clientName");
+		Map<String, Object> params = new HashMap<String, Object>();
+		url=env.getProperty("url-" +clientName);
+		
+		headers.add("Authorization", authToken);
+		headers.add("Content-Type", env.getProperty("Content-Type-json"));
+		headers.add("Accept", env.getProperty("Content-Type-json"));
+		
+		for (String key : requestParams.keySet()) {
+			if (key !="authToken"&& key!="clientName") {
+				params.put(key, requestParams.get(key));
+			}
+		}
+		String jsonData = gson.toJson(params);
+		HttpEntity<String> httpEntity = new HttpEntity<>(
+				jsonData, headers);
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
