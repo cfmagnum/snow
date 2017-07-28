@@ -18,6 +18,7 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -42,10 +43,11 @@ import com.google.gson.JsonSyntaxException;
 
 @RestController
 public class ApiController {
-	  // private String url ="https://api.sys.eu.cfdev.canopy-cloud.com/v2/spaces";  
-	   private MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 	   
-	   RestTemplate restTemplate = new RestTemplate();
+	@Autowired
+	Environment env; 
+	   private RestTemplate restTemplate = new RestTemplate();
+	   private Gson gson = new Gson(); 
 	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
 	   
 	@RequestMapping(value="/v1/reset-password-of-user" ,method = RequestMethod.POST )   
@@ -54,38 +56,49 @@ public class ApiController {
 		 Map<String, String> params = new HashMap<String, String>();
 		 ObjectMapper mapper = new ObjectMapper();
 		 Map<String,Object> requestParams = mapper.readValue(json, Map.class);
-		 
+		 MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		 String userName = "";
 		 String oldPassword ="";
 		 String newPassword ="";
 		 String userId ="";
-		 String uaatoken="";
 		 String userEmailId="";
+		 String authToken="";
+		 String clientName="";
+		 String url ="";
+		 String userToken ="";
+		 Map<String, Object> userParams = new HashMap<String, Object>();
 		 userName = (String) requestParams.get("username");
 		 oldPassword= (String) requestParams.get("oldPassword");
 		 newPassword= (String) requestParams.get("newPassword");
 		 userEmailId = (String) requestParams.get("userEmailId");
-	     uaatoken =  getUaaToken(userName, oldPassword);
-	     userId = getUserUaaId(userEmailId);
-	    String url = "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users/" + userId + "/password";
-	    Gson gson = new Gson(); 
-	    headers.add("Authorization", uaatoken);
-	    headers.add("Content-Type", "application/json");
-	    headers.add("Accept", "application/json");
+		 authToken= (String) requestParams.get("authToken");
+		 clientName=(String) requestParams.get("clientName");
+	     userId = getUserUaaId(userEmailId,authToken,clientName);
+	 
+	     userParams.put("userName", userName);
+	     userParams.put("password", oldPassword);
+	     userParams.put("clientName", clientName);
+	     String userData = gson.toJson(userParams);
+	   
+	     String urlforToken  = env.getProperty("url-uaa-token-api");
 	    
-		
-		
-		
-		 
-		
-		 params.put("oldPassword", oldPassword);
+	     userToken= restTemplate.postForObject(urlforToken, userData, String.class);
+	    
+	     url =  env.getProperty("url-" + clientName)+ "/" + userId + "/password";
+	
+	    
+	    headers.add("Authorization", userToken);
+	    headers.add("Content-Type", env.getProperty("Content-Type-json"));
+	    headers.add("Accept", env.getProperty("Content-Type-json"));
+	    
+	     params.put("oldPassword", oldPassword);
 		 params.put("password",newPassword);
 		
 		 
 		 String jsonData = gson.toJson(params);
 		 
         HttpEntity<String> requestEntity = new HttpEntity<>(jsonData,headers);
-        System.out.println(requestEntity);
+      
 	    try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -100,85 +113,48 @@ public class ApiController {
 		return restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
 		
 	}
-	public String getAdminUAAToken(){
-		String uaaUrl = "http://uaatokengenerator.apps.eu.cfdev.canopy-cloud.com/v1/get-UAA-token";
-		String token =  restTemplate.getForObject(uaaUrl, String.class);
-		return token;
-	}
-	public String getUserUaaId(String userEmailId){
+	
+	public String getUserUaaId(String userEmailId, String authToken,String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url= "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users?filter=emails.value eq '" + userEmailId + "'";	
-	    String uaatoken = getAdminUAAToken();
-	    String UaaId="";
-	    JsonObject resources = new JsonObject();
-	    Gson gson = new GsonBuilder().create();
-	    JsonObject job=new JsonObject();
-	    headers.add("Authorization", uaatoken);
-	    headers.add("content-type", "application/json");
-	    headers.add("Accept","application/json");
-	    try {
+		String url =  env.getProperty("url-" +clientName)+"?filter=emails.value eq '"
+				+ userEmailId + "'";
+		
+		String UaaId = "";
+		JsonObject resources = new JsonObject();
+		Gson gson = new GsonBuilder().create();
+		JsonObject job = new JsonObject();
+		headers.add("Authorization", authToken);
+		headers.add("content-type", "application/json");
+		headers.add("Accept", "application/json");
+		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-	    String userinfo = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class).getBody();
-	    try {
+		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
+	
+		String userinfo = restTemplate.exchange(url, HttpMethod.GET,
+				requestEntity, String.class).getBody();
+		try {
 			job = gson.fromJson(userinfo, JsonObject.class);
 		} catch (JsonSyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	 
-		if(job!=null){
-		    if(job.getAsJsonArray("resources")!=null){
-		    	resources=job.getAsJsonArray("resources").get(0).getAsJsonObject();    
-		    	UaaId = resources.get("id").getAsString();
-		    }
-	    }
-	   return UaaId;	
-	}
-	
-	public String getUaaToken(String userName, String oldPassword){
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "";
-		String json ="";
-		String authorizationKey ="";
-		Map<String, Object> token = new HashMap<String, Object>();
-		json ="grant_type=password&username=" + userName + "&password=" + oldPassword; 
-		url = "https://login.sys.eu.cfdev.canopy-cloud.com/oauth/token";
-		headers.add("Authorization", "Basic Y2Y6");
-	    headers.add("cache-control", "no-cache");
-	    headers.add("Content-Type", "application/x-www-form-urlencoded");
-	    headers.add("x-uaa-endpoint", "uaa.sys.eu.cfdev.canopy-cloud.com");
-	    headers.add("accept", "application/json");
-	    headers.add("charset", "utf-8");
-	    
-	    
-	    restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
-			protected boolean hasError(HttpStatus statusCode) {
-				return false;
+
+		if (job != null) {
+			if (job.getAsJsonArray("resources") != null) {
+				resources = job.getAsJsonArray("resources").get(0)
+						.getAsJsonObject();
+				UaaId = resources.get("id").getAsString();
 			}
-		});	
-	  
-	    
-	    HttpEntity<String> httpEntity = new HttpEntity<>(json, headers);
-	    try {
-			skipSslValidation(url);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-	 
-	   
-	    JacksonJsonParser parser = new JacksonJsonParser();
-		token = parser.parseMap(restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class).getBody());
-		
-		authorizationKey = token.get("token_type") + " " + token.get("access_token");
-		
-		return authorizationKey;
+		return UaaId;
 	}
+
+	
+	
 	
 	   public void skipSslValidation(String ConnectionURL) throws Exception {
 			TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
