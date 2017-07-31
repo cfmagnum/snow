@@ -97,7 +97,7 @@ public class ApiGateway {
 				String.class);
 	}
 
-	@RequestMapping(value = "/v1/associate-auditor-with-org", method = RequestMethod.POST)
+	@RequestMapping(value = "/v1/v1/associate-auditor-with-Org", method = RequestMethod.POST)
 	public ResponseEntity<String> AssociateAuditorwithOrg(Model model,
 			@RequestBody String data) {
 		model.addAttribute("instanceInfo", instanceInfo);
