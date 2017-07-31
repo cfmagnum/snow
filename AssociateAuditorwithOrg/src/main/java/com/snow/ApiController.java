@@ -45,36 +45,43 @@ public class ApiController {
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
-	@RequestMapping(value = "v1/associate-auditor-with-Org", method = RequestMethod.POST)
+	@RequestMapping(value = "v1/associate-auditor-with-org", method = RequestMethod.POST)
 	public ResponseEntity<String> associateAuditorWithOrg(Model model,
 			@RequestBody String data) throws JsonParseException,
 			JsonMappingException, IOException {
-		
+		System.getProperties().put("http.proxyHost",
+				"proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("http.proxyPort", "84");
+		System.getProperties().put("https.proxyHost",
+				"proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("https.proxyPort", "84");
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> requestParams;
-		String orgName ="";
-		String orgGuid ="";
-		String userEmailId="";
-		String uaaId ="";
-		String url="";
-		String authToken="";
-		String clientName="";
-		String host ="";
+		String orgName = "";
+		String orgGuid = "";
+		String userEmailId = "";
+		String uaaId = "";
+		String url = "";
+		String authToken = "";
+		String clientName = "";
+		String host = "";
 		requestParams = mapper.readValue(data, Map.class);
-		authToken= (String) requestParams.get("authToken");
-		clientName=(String) requestParams.get("clientName");
-		host=env.getProperty("Host-"+clientName);
+		authToken = (String) requestParams.get("authToken");
+		clientName = (String) requestParams.get("clientName");
+		host = env.getProperty("Host-" + clientName);
+		System.out.println(host);
 		orgName = (String) requestParams.get("organizationName");
-		orgGuid = getOrgGuid(orgName,authToken,host,clientName);
+		orgGuid = getOrgGuid(orgName, authToken, host, clientName);
 		userEmailId = (String) requestParams.get("userEmailId");
-		uaaId = getUserUaaId(userEmailId,authToken,clientName);
-		url = env.getProperty("url-" +clientName) + "/" + orgGuid + "/auditors/" + uaaId;
+		uaaId = getUserUaaId(userEmailId, authToken, clientName);
+		url = env.getProperty("url-" + clientName) + "/" + orgGuid
+				+ "/auditors/" + uaaId;
 		System.out.println(url);
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
-		headers.add("Host", env.getProperty("Host-"+clientName));
+		headers.add("Host", env.getProperty("Host-" + clientName));
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -93,11 +100,12 @@ public class ApiController {
 		return response;
 	}
 
-
-	public String getOrgGuid(String orgName,String authToken,String host, String clientName) {
+	public String getOrgGuid(String orgName, String authToken, String host,
+			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String urlForId = env.getProperty("url-" +clientName)+ "?q=name:" + orgName;
-		
+		String urlForId = env.getProperty("url-" + clientName) + "?q=name:"
+				+ orgName;
+
 		String orgId = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
@@ -131,11 +139,12 @@ public class ApiController {
 		return orgId;
 	}
 
-	public String getUserUaaId(String userEmailId, String authToken,String clientName) {
+	public String getUserUaaId(String userEmailId, String authToken,
+			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url =  env.getProperty("url-users-" +clientName)+"?filter=emails.value eq '"
-				+ userEmailId + "'";
-		
+		String url = env.getProperty("url-users-" + clientName)
+				+ "?filter=emails.value eq '" + userEmailId + "'";
+
 		String UaaId = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
