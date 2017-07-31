@@ -45,7 +45,7 @@ public class ApiController {
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
-	@RequestMapping(value = "v1/associate-user-with-org", method = RequestMethod.POST)
+	@RequestMapping(value = "/v1/associate-user-with-org", method = RequestMethod.POST)
 	public ResponseEntity<String> associateUserWithOrg(Model model,
 			@RequestBody String data) throws JsonParseException,
 			JsonMappingException, IOException {
@@ -60,13 +60,6 @@ public class ApiController {
 		String authToken = "";
 		String clientName = "";
 		String host = "";
-
-		System.getProperties().put("http.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("http.proxyPort", "84");
-		System.getProperties().put("https.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("https.proxyPort", "84");
 
 		requestParams = mapper.readValue(data, Map.class);
 		authToken = (String) requestParams.get("authToken");
