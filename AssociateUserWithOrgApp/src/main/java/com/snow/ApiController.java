@@ -45,15 +45,13 @@ public class ApiController {
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
-	@RequestMapping(value = "/v1/associate-user-with-org", method = RequestMethod.POST)
+	@RequestMapping(value = "v1/associate-user-with-org", method = RequestMethod.POST)
 	public ResponseEntity<String> associateUserWithOrg(Model model,
-			@RequestBody String json) throws JsonParseException,
+			@RequestBody String data) throws JsonParseException,
 			JsonMappingException, IOException {
-		model.addAttribute("instanceInfo", instanceInfo);
-
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
+		Map<String, Object> requestParams;
 		String orgName = "";
 		String orgGuid = "";
 		String userEmailId = "";
@@ -63,17 +61,25 @@ public class ApiController {
 		String clientName = "";
 		String host = "";
 
+		System.getProperties().put("http.proxyHost",
+				"proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("http.proxyPort", "84");
+		System.getProperties().put("https.proxyHost",
+				"proxy-in.glb.my-it-solutions.net");
+		System.getProperties().put("https.proxyPort", "84");
+
+		requestParams = mapper.readValue(data, Map.class);
 		authToken = (String) requestParams.get("authToken");
 		clientName = (String) requestParams.get("clientName");
 		host = env.getProperty("Host-" + clientName);
+		System.out.println(host);
 		orgName = (String) requestParams.get("organizationName");
 		orgGuid = getOrgGuid(orgName, authToken, host, clientName);
 		userEmailId = (String) requestParams.get("userEmailId");
 		uaaId = getUserUaaId(userEmailId, authToken, clientName);
-
-		url = env.getProperty("url-users-" + clientName) + "/" + uaaId
-				+ "/organizations/" + orgGuid;
-
+		url = env.getProperty("url-" + clientName) + "/" + orgGuid
+				+ "/auditors/" + uaaId;
+		System.out.println(url);
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
 		headers.add("Host", env.getProperty("Host-" + clientName));
@@ -89,7 +95,7 @@ public class ApiController {
 			}
 		});
 		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-		System.out.println(orgName + orgGuid + userEmailId + url);
+
 		ResponseEntity<String> response = restTemplate.exchange(url,
 				HttpMethod.PUT, requestEntity, String.class);
 		return response;
