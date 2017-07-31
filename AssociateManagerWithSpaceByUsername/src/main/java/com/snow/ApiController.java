@@ -79,7 +79,7 @@ public class ApiController {
 
 		System.out.println(spaceGuid + orgGuid + userName);
 		url = env.getProperty("url-" + clientName) + "/" + spaceGuid
-				+ "/auditors";
+				+ "/managers";
 
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
