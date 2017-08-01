@@ -2,7 +2,6 @@ package com.snow;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
@@ -39,10 +38,12 @@ import com.google.gson.JsonSyntaxException;
 
 @RestController
 public class ApiController {
+
 	@Autowired
 	Environment env;
 
 	RestTemplate restTemplate = new RestTemplate();
+
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
@@ -50,13 +51,13 @@ public class ApiController {
 	 * @param model
 	 *            -to read vcap parameters to conncet with CF
 	 * @param data
-	 *            - parameters for post request
+	 *            -parameters for post request
 	 * @return -ResponseEntity<String>
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	@RequestMapping(value = "/v1/associate-user-with-space", method = RequestMethod.POST)
+	@RequestMapping(value = "v1/associate-user-with-space", method = RequestMethod.POST)
 	public ResponseEntity<String> associateUserWithSpace(Model model,
 			@RequestBody String data) throws JsonParseException,
 			JsonMappingException, IOException {
@@ -65,6 +66,7 @@ public class ApiController {
 
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
+
 		String orgName = "";
 		String orgGuid = "";
 		String userEmailId = "";
@@ -73,13 +75,14 @@ public class ApiController {
 		String authToken = "";
 		String clientName = "";
 		String host = "";
-		String spaceName = "";
 		String spaceGuid = "";
+		String spaceName = "";
 
 		authToken = (String) requestParams.get("authToken");
 		clientName = (String) requestParams.get("clientName");
 		host = env.getProperty("Host-" + clientName);
 		orgName = (String) requestParams.get("organizationName");
+		System.out.println(orgName);
 
 		orgGuid = getOrgGuid(orgName, authToken, host, clientName);
 		System.out.println(orgGuid);
@@ -94,21 +97,13 @@ public class ApiController {
 		uaaId = getUserUaaId(userEmailId, authToken, clientName);
 		System.out.println(uaaId);
 
-		Gson gson = new Gson();
+		url = env.getProperty("url-spaces-" + clientName) + "/" + spaceGuid
+				+ "/auditors/" + uaaId;
 
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("userEmailId", userEmailId);
-
-		spaceGuid = getSpaceGuid(spaceName, orgGuid, authToken, host,
-				clientName);
-		System.out.println(spaceGuid);
-		uaaId = getUserUaaId(userEmailId, authToken, clientName);
-
-		url = env.getProperty("url-users-" + clientName) + "/" + uaaId
-				+ "/spaces/" + spaceGuid;
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
 		headers.add("Host", env.getProperty("Host-" + clientName));
+
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -120,27 +115,21 @@ public class ApiController {
 				return false;
 			}
 		});
-		String jsonData = gson.toJson(params);
-		HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
-
-		System.out.println(requestEntity);
-
+		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
 		System.out.println(url);
-
 		ResponseEntity<String> response = restTemplate.exchange(url,
 				HttpMethod.PUT, requestEntity, String.class);
 		return response;
-
 	}
 
 	/**
 	 * @param orgName
-	 *            -Name of the organization
+	 *            -Name of the Organization
 	 * @param authToken
-	 *            -Authorization token from UAA
+	 *            -Authorization token for UAA
 	 * @param host
 	 * @param clientName
-	 * @return -String This method returns guid of organization
+	 * @return String This method returns guid of the organization
 	 */
 	public String getOrgGuid(String orgName, String authToken, String host,
 			String clientName) {
