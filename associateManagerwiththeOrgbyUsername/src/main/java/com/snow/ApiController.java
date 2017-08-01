@@ -46,20 +46,24 @@ public class ApiController {
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
 	@RequestMapping(value = "v1/associate_manager_with_the_org_by_username", method = RequestMethod.POST)
 	public ResponseEntity<String> associateManagerwiththeOrgbyUsername(
-			Model model, @RequestBody String json) throws JsonParseException,
+			Model model, @RequestBody String data) throws JsonParseException,
 			JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		System.getProperties().put("http.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("http.proxyPort", "84");
-		System.getProperties().put("https.proxyHost",
-				"proxy-in.glb.my-it-solutions.net");
-		System.getProperties().put("https.proxyPort", "84");
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
+		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
 		String orgName = "";
 		String orgGuid = "";
 		String url = "";
@@ -108,6 +112,15 @@ public class ApiController {
 		return response;
 	}
 
+	/**
+	 * @param orgName
+	 *            -Name of the Organization
+	 * @param authToken
+	 *            -Authorization token for UAA
+	 * @param host
+	 * @param clientName
+	 * @return String This method returns guid of the organization
+	 */
 	public String getOrgGuid(String orgName, String authToken, String host,
 			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
@@ -147,6 +160,10 @@ public class ApiController {
 		return orgId;
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {

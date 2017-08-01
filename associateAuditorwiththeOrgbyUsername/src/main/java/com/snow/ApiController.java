@@ -47,6 +47,16 @@ public class ApiController {
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
 	@RequestMapping(value = "v1/associate_auditor_with_the_org_by_username", method = RequestMethod.POST)
 	public ResponseEntity<String> associateAuditorwiththeOrgbyUsername(
 			Model model, @RequestBody String json) throws JsonParseException,
@@ -108,6 +118,15 @@ public class ApiController {
 		return response;
 	}
 
+	/**
+	 * @param orgName
+	 *            -Name of the Organization
+	 * @param authToken
+	 *            -Authorization token for UAA
+	 * @param host
+	 * @param clientName
+	 * @return String This method returns guid of the organization
+	 */
 	public String getOrgGuid(String orgName, String authToken, String host,
 			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
@@ -147,6 +166,10 @@ public class ApiController {
 		return orgId;
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {

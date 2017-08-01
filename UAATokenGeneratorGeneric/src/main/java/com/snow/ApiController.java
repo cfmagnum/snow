@@ -42,15 +42,25 @@ public class ApiController {
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            - parameters for post request
+	 * @return -String
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
 	@RequestMapping(value = "/v1/get-UAA-token", method = RequestMethod.POST)
 	public String getAuthorizationToken(Model model, @RequestBody String data)
 			throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		
+
 		String url = "";
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		Map<String, Object> token = new HashMap<String, Object>();
-		
+
 		Map<String, Object> requestParams;
 		JacksonJsonParser parser = new JacksonJsonParser();
 
@@ -64,13 +74,15 @@ public class ApiController {
 		userName = (String) requestParams.get("userName");
 		password = (String) requestParams.get("password");
 		clientName = (String) requestParams.get("clientName");
-		json = "grant_type=password" + "&username=" + userName + "&password=" + password;
+		json = "grant_type=password" + "&username=" + userName + "&password="
+				+ password;
 		url = env.getProperty(clientName);
 
 		headers.add("Authorization", env.getProperty("Authorization"));
 		headers.add("cache-control", env.getProperty("cache-control"));
 		headers.add("Content-Type", env.getProperty("Content-Type"));
-		headers.add("x-uaa-endpoint", env.getProperty("x-uaa-endpoint-"+ clientName));
+		headers.add("x-uaa-endpoint",
+				env.getProperty("x-uaa-endpoint-" + clientName));
 		headers.add("Accept", env.getProperty("Accept"));
 		headers.add("charset", env.getProperty("charset"));
 
@@ -89,24 +101,32 @@ public class ApiController {
 			e.printStackTrace();
 		}
 
-		token = parser.parseMap(restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class).getBody());
+		token = parser.parseMap(restTemplate.exchange(url, HttpMethod.POST,
+				httpEntity, String.class).getBody());
 
-		authorizationKey = token.get("token_type") + " " + token.get("access_token");
+		authorizationKey = token.get("token_type") + " "
+				+ token.get("access_token");
 
 		return authorizationKey;
 
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
 				return null;
 			}
 
-			public void checkClientTrusted(X509Certificate[] certs, String authType) {
+			public void checkClientTrusted(X509Certificate[] certs,
+					String authType) {
 			}
 
-			public void checkServerTrusted(X509Certificate[] certs, String authType) {
+			public void checkServerTrusted(X509Certificate[] certs,
+					String authType) {
 			}
 		} };
 

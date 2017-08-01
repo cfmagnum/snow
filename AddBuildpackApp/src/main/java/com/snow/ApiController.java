@@ -34,38 +34,46 @@ import com.google.gson.Gson;
 @RestController
 public class ApiController {
 	@Autowired
-	Environment env; 
-    
+	Environment env;
+
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
-    
+
 	private RestTemplate restTemplate = new RestTemplate();
 	private Gson gson = new Gson();
+
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
 	@RequestMapping(value = "/v1/add-build-pack", method = RequestMethod.POST)
 	public ResponseEntity<String> AddBuildpack(Model model,
 			@RequestBody String data) throws FileNotFoundException, IOException {
-		
+
 		model.addAttribute("instanceInfo", instanceInfo);
-		
-		String url="";
-	    String clientName="";
-	    String authToken="";
+
+		String url = "";
+		String clientName = "";
+		String authToken = "";
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		Map<String, Object> params = new HashMap<String, Object>();
-		authToken=(String) requestParams.get("authToken");
-		clientName =(String) requestParams.get("clientName");
-        url=env.getProperty("url-" +clientName);
-        
-        
-        
+		authToken = (String) requestParams.get("authToken");
+		clientName = (String) requestParams.get("clientName");
+		url = env.getProperty("url-" + clientName);
+
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
-		headers.add("Host", env.getProperty("Host-"+clientName));
-        
+		headers.add("Host", env.getProperty("Host-" + clientName));
+
 		for (String key : requestParams.keySet()) {
-			if (key !="authToken"&& key!="clientName") {
+			if (key != "authToken" && key != "clientName") {
 				params.put(key, requestParams.get(key));
 			}
 		}
@@ -82,6 +90,10 @@ public class ApiController {
 
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {

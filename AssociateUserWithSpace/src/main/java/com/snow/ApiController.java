@@ -46,15 +46,25 @@ public class ApiController {
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            - parameters for post request
+	 * @return -ResponseEntity<String>
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
 	@RequestMapping(value = "/v1/associate-user-with-space", method = RequestMethod.POST)
 	public ResponseEntity<String> associateUserWithSpace(Model model,
-			@RequestBody String json) throws JsonParseException,
+			@RequestBody String data) throws JsonParseException,
 			JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 
 		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
+		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
 		String orgName = "";
 		String orgGuid = "";
 		String userEmailId = "";
@@ -123,6 +133,15 @@ public class ApiController {
 
 	}
 
+	/**
+	 * @param orgName
+	 *            -Name of the organization
+	 * @param authToken
+	 *            -Authorization token from UAA
+	 * @param host
+	 * @param clientName
+	 * @return -String This method returns guid of organization
+	 */
 	public String getOrgGuid(String orgName, String authToken, String host,
 			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
@@ -162,6 +181,17 @@ public class ApiController {
 		return orgId;
 	}
 
+	/**
+	 * @param spaceName
+	 *            -name of the space
+	 * @param orgGuid
+	 *            -guid of the organization
+	 * @param authToken
+	 *            -Authorization token for UAA
+	 * @param host
+	 * @param clientName
+	 * @return -String This method returns guid of space
+	 */
 	public String getSpaceGuid(String spaceName, String orgGuid,
 			String authToken, String host, String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
@@ -203,6 +233,14 @@ public class ApiController {
 		return guid;
 	}
 
+	/**
+	 * @param userEmailId
+	 *            -user email id
+	 * @param authToken
+	 *            -Authorization token for UAA
+	 * @param clientName
+	 * @return This method return UaaId of the user
+	 */
 	public String getUserUaaId(String userEmailId, String authToken,
 			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
@@ -242,6 +280,10 @@ public class ApiController {
 		return UaaId;
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {

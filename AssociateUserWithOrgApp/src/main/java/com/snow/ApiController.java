@@ -45,6 +45,16 @@ public class ApiController {
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param json
+	 *            - parameters for post request
+	 * @return -ResponseEntity<String>
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
 	@RequestMapping(value = "/v1/associate-user-with-org", method = RequestMethod.POST)
 	public ResponseEntity<String> associateUserWithOrg(Model model,
 			@RequestBody String data) throws JsonParseException,
@@ -94,6 +104,15 @@ public class ApiController {
 		return response;
 	}
 
+	/**
+	 * @param orgName
+	 *            -Name of the Organization
+	 * @param authToken
+	 *            -Authorization token for UAA
+	 * @param host
+	 * @param clientName
+	 * @return String This method returns guid of the organization
+	 */
 	public String getOrgGuid(String orgName, String authToken, String host,
 			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
@@ -133,6 +152,15 @@ public class ApiController {
 		return orgId;
 	}
 
+	/*
+	 * @param userEmailId -user email id
+	 * 
+	 * @param authToken -Authorization token for UAA
+	 * 
+	 * @param clientName
+	 * 
+	 * @return This method return UaaId of the user
+	 */
 	public String getUserUaaId(String userEmailId, String authToken,
 			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
@@ -172,6 +200,10 @@ public class ApiController {
 		return UaaId;
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
