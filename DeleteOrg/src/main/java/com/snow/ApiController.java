@@ -18,7 +18,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -40,39 +39,47 @@ public class ApiController {
 	@Autowired
 	Environment env;
 
-	
-
 	RestTemplate restTemplate = new RestTemplate();
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return HttpStatus
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 *             This method is used to delete organization
+	 */
 	@RequestMapping(value = "/v1/delete-org", method = RequestMethod.POST)
-	public HttpStatus DeleteOrg(Model model,
-			@RequestBody String data) throws FileNotFoundException, IOException {
+	public HttpStatus DeleteOrg(Model model, @RequestBody String data)
+			throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url="";
-		String authToken="";
-		String clientName="";
-		String orgName="";
-		String host ="";
-		String orgId ="";
+		String url = "";
+		String authToken = "";
+		String clientName = "";
+		String orgName = "";
+		String host = "";
+		String orgId = "";
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> requestParams;
-		
+
 		requestParams = mapper.readValue(data, Map.class);
-		authToken= (String) requestParams.get("authToken");
-		clientName=(String) requestParams.get("clientName");
-		host=env.getProperty("Host-"+clientName);
+		authToken = (String) requestParams.get("authToken");
+		clientName = (String) requestParams.get("clientName");
+		host = env.getProperty("Host-" + clientName);
 		orgName = (String) requestParams.get("name");
-		orgId = getOrgid(orgName,authToken,host,clientName);
-		
-		url= env.getProperty("url-" +clientName) + "/" + orgId;
-		
+		orgId = getOrgid(orgName, authToken, host, clientName);
+
+		url = env.getProperty("url-" + clientName) + "/" + orgId;
+
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
 		headers.add("Host", host);
-		
+
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -84,19 +91,27 @@ public class ApiController {
 				return false;
 			}
 		});
-		HttpEntity<String> requestEntity = new HttpEntity<>("Headers",
-				headers);
-		
-		HttpStatus response = restTemplate.exchange(url,
-				HttpMethod.DELETE, requestEntity, String.class).getStatusCode();
+		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
+
+		HttpStatus response = restTemplate.exchange(url, HttpMethod.DELETE,
+				requestEntity, String.class).getStatusCode();
 		return response;
 	}
 
-	
-
-	public String getOrgid(String orgName,String authToken,String host, String clientName) {
+	/**
+	 * @param orgName
+	 *            -Name of the Organization
+	 * @param authToken
+	 *            -Authorization token for UAA
+	 * @param host
+	 * @param clientName
+	 * @return String This method returns guid of the organization
+	 */
+	public String getOrgid(String orgName, String authToken, String host,
+			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String urlForId = env.getProperty("url-" +clientName)+ "?q=name:" + orgName;
+		String urlForId = env.getProperty("url-" + clientName) + "?q=name:"
+				+ orgName;
 		String orgId = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
@@ -130,6 +145,10 @@ public class ApiController {
 		return orgId;
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {

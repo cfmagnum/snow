@@ -17,7 +17,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -46,27 +45,37 @@ public class ApiController {
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param json
+	 *            -parameters for post request
+	 * @return -HttpStatus
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 *             This method is used to delete application
+	 */
 	@RequestMapping(value = "v1/delete-app", method = RequestMethod.POST)
-	public HttpStatus deleteApp(Model model,
-			@RequestBody String data) throws JsonParseException,
-			JsonMappingException, IOException {
+	public HttpStatus deleteApp(Model model, @RequestBody String data)
+			throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		
+
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		ObjectMapper mapper = new ObjectMapper();
-		String url ="";
-		String clientName="";
-	    String authToken="";
-	    String host ="";
-	    String appGuid ="";
+		String url = "";
+		String clientName = "";
+		String authToken = "";
+		String host = "";
+		String appGuid = "";
 		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
 		String appName = (String) requestParams.get("name");
-		authToken=(String) requestParams.get("authToken");
-		clientName =(String) requestParams.get("clientName");
-		host = env.getProperty("Host-"+clientName);
-		appGuid = getAppGuid(appName,authToken,host,clientName);
-		url=env.getProperty("url-" +clientName) + "/" + appGuid;
-		
+		authToken = (String) requestParams.get("authToken");
+		clientName = (String) requestParams.get("clientName");
+		host = env.getProperty("Host-" + clientName);
+		appGuid = getAppGuid(appName, authToken, host, clientName);
+		url = env.getProperty("url-" + clientName) + "/" + appGuid;
+
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type"));
 		headers.add("Host", host);
@@ -83,17 +92,26 @@ public class ApiController {
 		});
 		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
 
-		HttpStatus response = restTemplate.exchange(url,
-				HttpMethod.DELETE, requestEntity, String.class).getStatusCode();
+		HttpStatus response = restTemplate.exchange(url, HttpMethod.DELETE,
+				requestEntity, String.class).getStatusCode();
 		return response;
 	}
 
-	
-	public String getAppGuid(String appName, String authToken, String host,String clientName) {
+	/**
+	 * @param appName
+	 *            -Name of the app
+	 * @param authToken
+	 *            -Authorization token for UAA
+	 * @param host
+	 * @param clientName
+	 * @return String
+	 */
+	public String getAppGuid(String appName, String authToken, String host,
+			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = env.getProperty("url-app-" +clientName)  +"?q=name:"
+		String url = env.getProperty("url-app-" + clientName) + "?q=name:"
 				+ appName;
-		
+
 		String guid = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
@@ -128,6 +146,10 @@ public class ApiController {
 		return guid;
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
