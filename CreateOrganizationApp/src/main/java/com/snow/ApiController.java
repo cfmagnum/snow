@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
-import javax.net.ssl.X509TrustManager;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -39,32 +39,42 @@ public class ApiController {
 
 	private RestTemplate restTemplate = new RestTemplate();
 	private Gson gson = new Gson();
-	
+
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            - parameters for post request
+	 * @return ResponseEntity<String>
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 *             This method is used for creating organization
+	 */
 	@RequestMapping(value = "/v1/create-organization", method = RequestMethod.POST)
 	public ResponseEntity<String> Create_Organization(Model model,
 			@RequestBody String data) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-        
-		String url="";
-	    String clientName="";
-	    String authToken="";
+
+		String url = "";
+		String clientName = "";
+		String authToken = "";
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		Map<String, Object> params = new HashMap<String, Object>();
-		authToken=(String) requestParams.get("authToken");
-		clientName =(String) requestParams.get("clientName");
-		
-		url=env.getProperty("url-" +clientName);
+		authToken = (String) requestParams.get("authToken");
+		clientName = (String) requestParams.get("clientName");
+
+		url = env.getProperty("url-" + clientName);
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
-		headers.add("Accept", env.getProperty("Host-"+clientName));
+		headers.add("Accept", env.getProperty("Host-" + clientName));
 
 		for (String key : requestParams.keySet()) {
-			if (key !="authToken"&& key!="clientName") {
+			if (key != "authToken" && key != "clientName") {
 				params.put(key, requestParams.get(key));
 			}
 		}
@@ -76,22 +86,28 @@ public class ApiController {
 			e.printStackTrace();
 		}
 		HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
-		
-		
+
 		return restTemplate.exchange(url, HttpMethod.POST, requestEntity,
 				String.class);
 
 	}
+
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
 				return null;
 			}
 
-			public void checkClientTrusted(X509Certificate[] certs, String authType) {
+			public void checkClientTrusted(X509Certificate[] certs,
+					String authType) {
 			}
 
-			public void checkServerTrusted(X509Certificate[] certs, String authType) {
+			public void checkServerTrusted(X509Certificate[] certs,
+					String authType) {
 			}
 		} };
 
