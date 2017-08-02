@@ -45,17 +45,25 @@ public class ApiController {
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
 	@RequestMapping(value = "/v1/update-service-broker", method = RequestMethod.POST)
 	public ResponseEntity<String> updateServiceBroker(Model model,
 			@RequestBody String data) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-	
 
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-	
+
 		String name = "";
 		String guid = "";
-		String url="";
+		String url = "";
 		String authToken = "";
 		String clientName = "";
 		String host = "";
@@ -66,9 +74,9 @@ public class ApiController {
 		clientName = (String) requestParams.get("clientName");
 		host = env.getProperty("Host-" + clientName);
 		name = (String) requestParams.get("name");
-		guid = getServiceBrokerGuid(name,authToken,host,clientName);
+		guid = getServiceBrokerGuid(name, authToken, host, clientName);
 
-		url=env.getProperty("url-" +clientName) + "/" + guid;
+		url = env.getProperty("url-" + clientName) + "/" + guid;
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
 		headers.add("Accept", host);
@@ -100,17 +108,21 @@ public class ApiController {
 		return response;
 	}
 
-	public String getUaaToken() {
-		String token = restTemplate.getForObject(env.getProperty("uaaUrl"),
-				String.class);
-		return token;
-	}
-
-	public String getServiceBrokerGuid(String name,String authToken,String host, String clientName) {
+	/**
+	 * @param name
+	 *            -name of service broker
+	 * @param authToken
+	 *            -Authorization token for UAA
+	 * @param host
+	 * @param clientName
+	 * @return String This method returns guid of service broker
+	 */
+	public String getServiceBrokerGuid(String name, String authToken,
+			String host, String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = env.getProperty("url-" +clientName)+"?q=name:" + name;
+		String url = env.getProperty("url-" + clientName) + "?q=name:" + name;
 		System.out.println(url);
-		
+
 		String guid = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
@@ -148,6 +160,10 @@ public class ApiController {
 		return guid;
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {

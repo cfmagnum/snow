@@ -34,34 +34,41 @@ public class ApiController {
 	@Autowired
 	Environment env;
 
-	 
-
 	private RestTemplate restTemplate = new RestTemplate();
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 * @return ResponseEntity<String>
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 *             This method is used to list users
+	 */
 	@RequestMapping(value = "/v1/list-users", method = RequestMethod.POST)
-	public ResponseEntity<String> getUsers(Model model,@RequestBody String data)
+	public ResponseEntity<String> getUsers(Model model, @RequestBody String data)
 			throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-        
-		String url="";
-		String authToken="";
-		String clientName="";
-		
+
+		String url = "";
+		String authToken = "";
+		String clientName = "";
+
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> requestParams;
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		requestParams = mapper.readValue(data, Map.class);
-		authToken= (String) requestParams.get("authToken");
-		clientName=(String) requestParams.get("clientName");
-		
-		url=env.getProperty("url-" +clientName);
+		authToken = (String) requestParams.get("authToken");
+		clientName = (String) requestParams.get("clientName");
+
+		url = env.getProperty("url-" + clientName);
 		System.out.println(url);
 		headers.add("Authorization", authToken);
 		headers.add("Accept", env.getProperty("Content-Type-json"));
 		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-		
+
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -73,6 +80,10 @@ public class ApiController {
 
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {

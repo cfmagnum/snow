@@ -5,12 +5,14 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
 import org.springframework.core.env.Environment;
@@ -44,31 +46,42 @@ public class ApiController {
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
 	@RequestMapping(value = "/v1/update-quota-size-of-space", method = RequestMethod.POST)
 	public ResponseEntity<String> updateQuotaSizeOfSpace(Model model,
 			@RequestBody String data) throws FileNotFoundException, IOException {
 
 		model.addAttribute("instanceInfo", instanceInfo);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String authToken="";
-		String clientName="";
-		String host ="";
+		String authToken = "";
+		String clientName = "";
+		String host = "";
 		String spaceName = "";
 		String quota_definition_guid = "";
 		String url = "";
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> params = new HashMap<String, Object>();
 		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
-		authToken= (String) requestParams.get("authToken");
-		clientName=(String) requestParams.get("clientName");
-		host=env.getProperty("Host-"+clientName);
+		authToken = (String) requestParams.get("authToken");
+		clientName = (String) requestParams.get("clientName");
+		host = env.getProperty("Host-" + clientName);
 		spaceName = (String) requestParams.get("spaceName");
-		quota_definition_guid = getQuotaDefinitionGuid(spaceName,authToken,host,clientName);
-		url = env.getProperty("url-" +clientName) +"/" + quota_definition_guid;
+		quota_definition_guid = getQuotaDefinitionGuid(spaceName, authToken,
+				host, clientName);
+		url = env.getProperty("url-" + clientName) + "/"
+				+ quota_definition_guid;
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
 		headers.add("Accept", host);
-		
+
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -82,26 +95,34 @@ public class ApiController {
 		});
 
 		for (String key : requestParams.keySet()) {
-			if (key != "spaceName" && key !="authToken" && key!="clientName") {
+			if (key != "spaceName" && key != "authToken" && key != "clientName") {
 				params.put(key, requestParams.get(key));
 			}
 		}
-		
+
 		String jsonData = gson.toJson(params);
 		HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
 
-		
 		ResponseEntity<String> response = restTemplate.exchange(url,
 				HttpMethod.PUT, requestEntity, String.class);
 		return response;
 	}
 
-	
-
-	public String getQuotaDefinitionGuid(String spaceName, String authToken,String host, String clientName) {
+	/**
+	 * @param spaceName
+	 *            -name of the space
+	 * @param authToken
+	 *            -Authorization token for UAA
+	 * @param host
+	 * @param clientName
+	 * @return String This method retruns guid of quota
+	 */
+	public String getQuotaDefinitionGuid(String spaceName, String authToken,
+			String host, String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 
-		String url = env.getProperty("url-space-" +clientName) + "?q=name:"  + spaceName;
+		String url = env.getProperty("url-space-" + clientName) + "?q=name:"
+				+ spaceName;
 		String quota_definition_guid = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
@@ -115,10 +136,10 @@ public class ApiController {
 			e.printStackTrace();
 		}
 		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-		
+
 		String orgInfo = restTemplate.exchange(url, HttpMethod.GET,
 				requestEntity, String.class).getBody();
-		
+
 		try {
 			job = gson.fromJson(orgInfo, JsonObject.class);
 		} catch (JsonSyntaxException e) {
@@ -133,7 +154,7 @@ public class ApiController {
 			}
 
 			JsonObject metadata = resources.get("entity").getAsJsonObject();
-		
+
 			quota_definition_guid = metadata.get("space_quota_definition_guid")
 					.getAsString();
 		}
@@ -141,6 +162,10 @@ public class ApiController {
 		return quota_definition_guid;
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {

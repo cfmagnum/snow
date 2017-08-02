@@ -45,32 +45,38 @@ public class ApiController {
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
 	@RequestMapping(value = "/v1/update-quota-size-of-org", method = RequestMethod.POST)
 	public ResponseEntity<String> updateQuotaSizeOfOrg(Model model,
 			@RequestBody String data) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		
-		
-		
 		String orgName = "";
-		
 		String quota_definition_guid = "";
-		
-		String url="";
-	    String clientName="";
-	    String authToken="";
-	    String host ="";
+		String url = "";
+		String clientName = "";
+		String authToken = "";
+		String host = "";
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		Map<String, Object> params = new HashMap<String, Object>();
-		authToken=(String) requestParams.get("authToken");
-		clientName =(String) requestParams.get("clientName");
-		host=env.getProperty("Host-"+clientName);
+		authToken = (String) requestParams.get("authToken");
+		clientName = (String) requestParams.get("clientName");
+		host = env.getProperty("Host-" + clientName);
 		orgName = (String) requestParams.get("organizationName");
-		quota_definition_guid = getQuotaDefinitionGuid(orgName,authToken,host,clientName);
-		
-		url = env.getProperty("url-" +clientName) + "/" + quota_definition_guid;
+		quota_definition_guid = getQuotaDefinitionGuid(orgName, authToken,
+				host, clientName);
+
+		url = env.getProperty("url-" + clientName) + "/"
+				+ quota_definition_guid;
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
 		headers.add("Accept", env.getProperty("Host"));
@@ -88,32 +94,35 @@ public class ApiController {
 		});
 
 		for (String key : requestParams.keySet()) {
-			if (key != "organizationName" && key !="authToken"&& key!="clientName") {
+			if (key != "organizationName" && key != "authToken"
+					&& key != "clientName") {
 				params.put(key, requestParams.get(key));
 			}
 		}
-		
+
 		String jsonData = gson.toJson(params);
 		HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
 
-	
 		ResponseEntity<String> response = restTemplate.exchange(url,
 				HttpMethod.PUT, requestEntity, String.class);
 		return response;
 	}
 
-	public String getUaaToken() {
-		String token = restTemplate.getForObject(env.getProperty("uaaUrl"),
-				String.class);
-		return token;
-	}
-
-	public String getQuotaDefinitionGuid(String orgName, String authToken,String host, String clientName) {
+	/**
+	 * @param orgName
+	 *            -Name of the Organization
+	 * @param authToken
+	 *            -Authorization token for UAA
+	 * @param host
+	 * @param clientName
+	 * @return String This method returns guid of the organization
+	 */
+	public String getQuotaDefinitionGuid(String orgName, String authToken,
+			String host, String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url =env.getProperty("url-org-" +clientName) +"?q=name:"
+		String url = env.getProperty("url-org-" + clientName) + "?q=name:"
 				+ orgName;
-		
-		
+
 		String quota_definition_guid = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
@@ -144,14 +153,18 @@ public class ApiController {
 			}
 
 			JsonObject metadata = resources.get("entity").getAsJsonObject();
-			
+
 			quota_definition_guid = metadata.get("quota_definition_guid")
 					.getAsString();
 		}
-		
+
 		return quota_definition_guid;
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {

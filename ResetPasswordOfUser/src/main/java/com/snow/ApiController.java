@@ -1,7 +1,5 @@
 package com.snow;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -14,9 +12,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
@@ -39,86 +35,104 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
-
-
 @RestController
 public class ApiController {
-	   
+
 	@Autowired
-	Environment env; 
-	   private RestTemplate restTemplate = new RestTemplate();
-	   private Gson gson = new Gson(); 
-	   @Autowired(required = false) ApplicationInstanceInfo instanceInfo;
-	   
-	@RequestMapping(value="/v1/reset-password-of-user" ,method = RequestMethod.POST )   
-	public ResponseEntity<String> resetPassword(Model model, @RequestBody String json) throws  IOException{
-		model.addAttribute("instanceInfo",instanceInfo);
-		 Map<String, String> params = new HashMap<String, String>();
-		 ObjectMapper mapper = new ObjectMapper();
-		 Map<String,Object> requestParams = mapper.readValue(json, Map.class);
-		 MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		 String userName = "";
-		 String oldPassword ="";
-		 String newPassword ="";
-		 String userId ="";
-		 String userEmailId="";
-		 String authToken="";
-		 String clientName="";
-		 String url ="";
-		 String userToken ="";
-		 Map<String, Object> userParams = new HashMap<String, Object>();
-		 userName = (String) requestParams.get("username");
-		 oldPassword= (String) requestParams.get("oldPassword");
-		 newPassword= (String) requestParams.get("newPassword");
-		 userEmailId = (String) requestParams.get("userEmailId");
-		 authToken= (String) requestParams.get("authToken");
-		 clientName=(String) requestParams.get("clientName");
-	     userId = getUserUaaId(userEmailId,authToken,clientName);
-	 
-	     userParams.put("userName", userName);
-	     userParams.put("password", oldPassword);
-	     userParams.put("clientName", clientName);
-	     String userData = gson.toJson(userParams);
-	   
-	     String urlforToken  = env.getProperty("url-uaa-token-api");
-	    
-	     userToken= restTemplate.postForObject(urlforToken, userData, String.class);
-	    
-	     url =  env.getProperty("url-" + clientName)+ "/" + userId + "/password";
-	
-	    
-	    headers.add("Authorization", userToken);
-	    headers.add("Content-Type", env.getProperty("Content-Type-json"));
-	    headers.add("Accept", env.getProperty("Content-Type-json"));
-	    
-	     params.put("oldPassword", oldPassword);
-		 params.put("password",newPassword);
-		
-		 
-		 String jsonData = gson.toJson(params);
-		 
-        HttpEntity<String> requestEntity = new HttpEntity<>(jsonData,headers);
-      
-	    try {
+	Environment env;
+	private RestTemplate restTemplate = new RestTemplate();
+	private Gson gson = new Gson();
+	@Autowired(required = false)
+	ApplicationInstanceInfo instanceInfo;
+
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 * @throws IOException
+	 *             This method is used to reset password of user
+	 */
+	@RequestMapping(value = "/v1/reset-password-of-user", method = RequestMethod.POST)
+	public ResponseEntity<String> resetPassword(Model model,
+			@RequestBody String data) throws IOException {
+		model.addAttribute("instanceInfo", instanceInfo);
+		Map<String, String> params = new HashMap<String, String>();
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		String userName = "";
+		String oldPassword = "";
+		String newPassword = "";
+		String userId = "";
+		String userEmailId = "";
+		String authToken = "";
+		String clientName = "";
+		String url = "";
+		String userToken = "";
+		Map<String, Object> userParams = new HashMap<String, Object>();
+		userName = (String) requestParams.get("username");
+		oldPassword = (String) requestParams.get("oldPassword");
+		newPassword = (String) requestParams.get("newPassword");
+		userEmailId = (String) requestParams.get("userEmailId");
+		authToken = (String) requestParams.get("authToken");
+		clientName = (String) requestParams.get("clientName");
+		userId = getUserUaaId(userEmailId, authToken, clientName);
+
+		userParams.put("userName", userName);
+		userParams.put("password", oldPassword);
+		userParams.put("clientName", clientName);
+		String userData = gson.toJson(userParams);
+
+		String urlforToken = env.getProperty("url-uaa-token-api");
+
+		userToken = restTemplate.postForObject(urlforToken, userData,
+				String.class);
+
+		url = env.getProperty("url-" + clientName) + "/" + userId + "/password";
+
+		headers.add("Authorization", userToken);
+		headers.add("Content-Type", env.getProperty("Content-Type-json"));
+		headers.add("Accept", env.getProperty("Content-Type-json"));
+
+		params.put("oldPassword", oldPassword);
+		params.put("password", newPassword);
+
+		String jsonData = gson.toJson(params);
+
+		HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
+
+		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
+		restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
 			protected boolean hasError(HttpStatus statusCode) {
 				return false;
 			}
-		});	
-		return restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
-		
+		});
+		return restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
+				String.class);
+
 	}
-	
-	public String getUserUaaId(String userEmailId, String authToken,String clientName) {
+
+	/**
+	 * @param userEmailId
+	 *            -user email id
+	 * @param authToken
+	 *            -Authorization token for UAA
+	 * @param clientName
+	 * @return This method return UaaId of the user
+	 */
+	public String getUserUaaId(String userEmailId, String authToken,
+			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url =  env.getProperty("url-" +clientName)+"?filter=emails.value eq '"
-				+ userEmailId + "'";
-		
+		String url = env.getProperty("url-" + clientName)
+				+ "?filter=emails.value eq '" + userEmailId + "'";
+
 		String UaaId = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
@@ -133,7 +147,7 @@ public class ApiController {
 			e.printStackTrace();
 		}
 		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-	
+
 		String userinfo = restTemplate.exchange(url, HttpMethod.GET,
 				requestEntity, String.class).getBody();
 		try {
@@ -153,37 +167,39 @@ public class ApiController {
 		return UaaId;
 	}
 
-	
-	
-	
-	   public void skipSslValidation(String ConnectionURL) throws Exception {
-			TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-					return null;
-				}
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
+	public void skipSslValidation(String ConnectionURL) throws Exception {
+		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+				return null;
+			}
 
-				public void checkClientTrusted(X509Certificate[] certs, String authType) {
-				}
+			public void checkClientTrusted(X509Certificate[] certs,
+					String authType) {
+			}
 
-				public void checkServerTrusted(X509Certificate[] certs, String authType) {
-				}
-			} };
+			public void checkServerTrusted(X509Certificate[] certs,
+					String authType) {
+			}
+		} };
 
-			// Install the all-trusting trust manager
-			SSLContext sc = SSLContext.getInstance("SSL");
-			sc.init(null, trustAllCerts, new java.security.SecureRandom());
-			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		// Install the all-trusting trust manager
+		SSLContext sc = SSLContext.getInstance("SSL");
+		sc.init(null, trustAllCerts, new java.security.SecureRandom());
+		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
-			// Create all-trusting host name verifier
-			HostnameVerifier allHostsValid = new HostnameVerifier() {
-				public boolean verify(String hostname, SSLSession session) {
-					return true;
-				}
-			};
+		// Create all-trusting host name verifier
+		HostnameVerifier allHostsValid = new HostnameVerifier() {
+			public boolean verify(String hostname, SSLSession session) {
+				return true;
+			}
+		};
 
-			// Install the all-trusting host verifier
-			HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+		// Install the all-trusting host verifier
+		HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
 
-			
-	   }
+	}
 }
