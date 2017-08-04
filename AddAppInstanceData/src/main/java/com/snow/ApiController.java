@@ -55,7 +55,7 @@ public class ApiController {
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	@RequestMapping(value = "/v1/add-app-instance", method = RequestMethod.POST)
+	@RequestMapping(value = "v1/add-app-instance-data", method = RequestMethod.POST)
 	public ResponseEntity<String> AddAppInstanceData(Model model,
 			@RequestBody String data) throws JsonParseException,
 			JsonMappingException, IOException {
