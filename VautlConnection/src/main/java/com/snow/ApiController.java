@@ -72,16 +72,9 @@ public class ApiController {
         final Map<String, String> secrets = new HashMap<String, String>();
         final Vault vault = new Vault(config);
 
-       // System.out.println("connection done");
-      
-        // secrets.put("value", "world");
-       // secrets.put("other_value", "You can store multiple name/value pairs under a single key");
-          
-        // Write operation
-        //final LogicalResponse writeResponse = vault.logical().write("secret/hello", secrets);
-                                               
-        // Read operation
-        final String value = vault.logical() .read("secret/aws-clients/acf-devtest/shared/automation/ui").getData().get("value");
+     
+        String value = vault.logical().read("secret/hello").getData().get("value");
+        value = "secret is" + value;
         return value;
 
 	}
