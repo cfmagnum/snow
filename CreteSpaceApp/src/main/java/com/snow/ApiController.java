@@ -1,6 +1,5 @@
 package com.snow;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -14,12 +13,12 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.cloud.app.ApplicationInstanceInfo;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -30,18 +29,19 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+import com.bettercloud.vault.Vault;
+import com.bettercloud.vault.VaultConfig;
+import com.bettercloud.vault.VaultException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 
 @RestController
 public class ApiController {
 	@Autowired
-	Environment env;
-
+	private Environment env;
 	private RestTemplate restTemplate = new RestTemplate();
+	private ObjectMapper mapper = new ObjectMapper();
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
@@ -49,114 +49,34 @@ public class ApiController {
 	 * @param model
 	 *            -to read vcap parameters to conncet with CF
 	 * @param data
-	 *            -parameters for post request
-	 * @return ResponseEntity<String>
-	 * @throws FileNotFoundException
+	 *            - parameters for post request
+	 * @return -String
+	 * @throws VaultException 
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
 	 * @throws IOException
-	 *             This method is used to create space
 	 */
-	@RequestMapping(value = "/v1/create-space", method = RequestMethod.POST)
-	public ResponseEntity<String> Create_Space(Model model,
-			@RequestBody String data) throws FileNotFoundException, IOException {
+	@RequestMapping(value = "/v1/get-vault-secret", method = RequestMethod.POST)
+	public String getVaultToken(Model model) throws VaultException{
+			
 		model.addAttribute("instanceInfo", instanceInfo);
-
-		Gson gson = new Gson();
-		String url = "";
-		String orgName = "";
-		String orgGuid = "";
-		String spaceName = "";
-		String clientName = "";
-		String authToken = "";
-		String host = env.getProperty("Host-" + clientName);
-		Map<String, String> params = new HashMap<String, String>();
-		ObjectMapper mapper = new ObjectMapper();
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-
-		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
-		authToken = (String) requestParams.get("authToken");
-		clientName = (String) requestParams.get("clientName");
-		orgName = (String) requestParams.get("organizationName");
-		orgGuid = getOrgGuid(orgName, authToken, host);
-		spaceName = (String) requestParams.get("name");
-		url = env.getProperty("url-" + clientName);
-
-		params.put("organization_guid", orgGuid);
-
-		for (String key : requestParams.keySet()) {
-			if (key != "authToken" && key != "clientName"
-					&& key != "organizationName") {
-				params.put(key, (String) requestParams.get(key));
-			}
-		}
-		String jsonData = gson.toJson(params);
-
-		headers.add("Authorization", authToken);
-		headers.add("Content-Type", env.getProperty("Content-Type-json"));
-		headers.add("Host", host);
-		HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
-
+		String url ="https://10.4.2.16:8200";
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
-			protected boolean hasError(HttpStatus statusCode) {
-				return false;
-			}
-		});
-		return restTemplate.exchange(url, HttpMethod.POST, requestEntity,
-				String.class);
 
-	}
+		final VaultConfig config = new VaultConfig().address("https://10.4.2.16:8200").token("e97c6601-2986-2acc-83ef-e5e134d6fe7e").build();
+        
+        final Map<String, String> secrets = new HashMap<String, String>();
+        final Vault vault = new Vault(config);
 
-	/**
-	 * @param orgName
-	 *            -Name of the Organization
-	 * @param authToken
-	 *            -Authorization token for UAA
-	 * @param host
-	 * @param clientName
-	 * @return String This method returns guid of the organization
-	 */
-	public String getOrgGuid(String orgName, String authToken, String host) {
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = "https://api.sys.eu.cfdev.canopy-cloud.com/v2/organizations?q=name:"
-				+ orgName;
+       
+        final String value = vault.logical() .read("secret/aws-clients/acf-devtest/shared/automation/ui").getData().get("value");
+        return value;
 
-		String guid = "";
-		JsonObject resources = new JsonObject();
-		Gson gson = new GsonBuilder().create();
-		JsonObject job = new JsonObject();
-		headers.add("Authorization", authToken);
-		headers.add("Host", host);
-		try {
-			skipSslValidation(url);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
-		String orgInfo = restTemplate.exchange(url, HttpMethod.GET,
-				requestEntity, String.class).getBody();
-		try {
-			job = gson.fromJson(orgInfo, JsonObject.class);
-		} catch (JsonSyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		if (job != null) {
-			if (job.getAsJsonArray("resources") != null) {
-				resources = job.getAsJsonArray("resources").get(0)
-						.getAsJsonObject();
-			}
-
-			JsonObject metadata = resources.get("metadata").getAsJsonObject();
-			guid = metadata.get("guid").getAsString();
-		}
-		return guid;
 	}
 
 	/**
@@ -194,4 +114,5 @@ public class ApiController {
 		HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
 
 	}
+
 }
