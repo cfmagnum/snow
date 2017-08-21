@@ -56,8 +56,8 @@ public class ApiController {
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	@RequestMapping(value = "/v1/get-vault-secret", method = RequestMethod.GET)
-	public String getVaultToken(Model model, @RequestBody String data) throws VaultException{
+	@RequestMapping(value = "/v1/get-vault-secret", method = RequestMethod.POST)
+	public String getVaultToken(Model model) throws VaultException{
 			
 		model.addAttribute("instanceInfo", instanceInfo);
 
