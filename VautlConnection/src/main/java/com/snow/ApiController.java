@@ -73,7 +73,7 @@ public class ApiController {
         final Vault vault = new Vault(config);
 
      
-        String value = vault.logical().read("secret/handshake").getData().get("value");
+        String value = vault.logical().read("secret/handshake/hello").getData().get("value");
         value = "secret is" + value;
         return value;
 
