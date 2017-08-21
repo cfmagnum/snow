@@ -19,6 +19,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -44,45 +45,38 @@ public class ApiController {
 	private ObjectMapper mapper = new ObjectMapper();
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
-
-	/**
-	 * @param model
-	 *            -to read vcap parameters to conncet with CF
-	 * @param data
-	 *            - parameters for post request
-	 * @return -String
-	 * @throws VaultException 
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws IOException
-	 */
-	@RequestMapping(value = "/v1/get-vault-secret", method = RequestMethod.POST)
-	public String getVaultToken(Model model) throws VaultException{
-		String url = "https://10.4.2.16:8200";	
+	
+	@RequestMapping(value = "/v1/get-vault-secret", method = RequestMethod.GET)
+	public ResponseEntity<String> getVaultSecret(Model model)
+		 {
 		model.addAttribute("instanceInfo", instanceInfo);
+
+		String url = "";
+		String vaultToken="";
+
+		ObjectMapper mapper = new ObjectMapper();
+	//	Map<String, Object> requestParams;
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		//requestParams = mapper.readValue(data, Map.class);
+		vaultToken = "e97c6601-2986-2acc-83ef-e5e134d6fe7e";
+		url = "https://10.4.2.16:8200/v1/secret/handshake";
+		System.out.println(url);
+		headers.add("X-Vault-Token", vaultToken);
+		
+		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
+
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		final VaultConfig config = new VaultConfig().address("https://10.4.2.16:8200").token("e97c6601-2986-2acc-83ef-e5e134d6fe7e").build();
-        
-        final Map<String, String> secrets = new HashMap<String, String>();
-        final Vault vault = new Vault(config);
-
-     
-        String value = vault.logical().read("secret/handshake/hello").getData().get("value");
-        value = "secret is" + value;
-        return value;
+		return restTemplate.exchange(url, HttpMethod.GET, requestEntity,
+				String.class);
 
 	}
 
-	/**
-	 * @param ConnectionURL
-	 * @throws Exception
-	 */
+
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
