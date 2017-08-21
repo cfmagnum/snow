@@ -58,8 +58,14 @@ public class ApiController {
 	 */
 	@RequestMapping(value = "/v1/get-vault-secret", method = RequestMethod.POST)
 	public String getVaultToken(Model model) throws VaultException{
-			
+		String url = "https://10.4.2.16:8200";	
 		model.addAttribute("instanceInfo", instanceInfo);
+		try {
+			skipSslValidation(url);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		final VaultConfig config = new VaultConfig().address("https://10.4.2.16:8200").token("e97c6601-2986-2acc-83ef-e5e134d6fe7e").build();
         
