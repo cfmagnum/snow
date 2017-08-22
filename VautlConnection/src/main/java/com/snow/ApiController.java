@@ -59,8 +59,8 @@ public class ApiController {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		//requestParams = mapper.readValue(data, Map.class);
 		vaultToken = "e97c6601-2986-2acc-83ef-e5e134d6fe7e";
-		url = "https://10.4.2.16:8200/v1/secret/handshake";
-		System.out.println(url);
+		url = "https://10.4.2.16:8200/v1/secret/aws-clients/acf-devtest/cf/creds/users/admin";
+		
 		headers.add("X-Vault-Token", vaultToken);
 		
 		HttpEntity<String> requestEntity = new HttpEntity<>("Headers", headers);
