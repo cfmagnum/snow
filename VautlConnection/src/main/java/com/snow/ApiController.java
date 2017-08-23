@@ -51,7 +51,7 @@ public class ApiController {
 	ApplicationInstanceInfo instanceInfo;
 	
 	@RequestMapping(value = "/v1/get-vault-secret", method = RequestMethod.POST)
-	public String getVaultSecret(Model model, @RequestBody String data)
+	public String getVaultSecret(Model model, @RequestBody String data) throws JsonParseException, JsonMappingException, IOException
 		 {
 		model.addAttribute("instanceInfo", instanceInfo);
 
@@ -61,10 +61,12 @@ public class ApiController {
 		JsonObject jsonResponse = new JsonObject();
 		JsonObject resources = new JsonObject();
 		JsonObject passwordData = new JsonObject();
-		String clientName = data;
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
+		String clientName = (String) requestParams.get("clientName");
 		vaultToken = env.getProperty("vault-token");
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		url = env.getProperty("vault-token");
+		url = env.getProperty("vault-url-" + clientName);
 		
 		headers.add("X-Vault-Token", vaultToken);
 		
