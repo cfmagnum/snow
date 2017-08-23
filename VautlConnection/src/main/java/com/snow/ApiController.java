@@ -51,7 +51,7 @@ public class ApiController {
 	ApplicationInstanceInfo instanceInfo;
 	
 	@RequestMapping(value = "/v1/get-vault-secret", method = RequestMethod.POST)
-	public String getVaultSecret(Model model, @RequestBody String data) throws JsonParseException, JsonMappingException, IOException
+	public JsonObject getVaultSecret(Model model, @RequestBody String data) throws JsonParseException, JsonMappingException, IOException
 		 {
 		model.addAttribute("instanceInfo", instanceInfo);
 
@@ -89,14 +89,15 @@ public class ApiController {
 			e.printStackTrace();
 		}
 		if (jsonResponse != null) {
-			if (jsonResponse.getAsJsonArray("data") != null) {
-				passwordData = jsonResponse.getAsJsonArray("data").get(0)
-						.getAsJsonObject();
+			if (jsonResponse.getAsJsonObject("data") != null) {
+				passwordData = jsonResponse.getAsJsonObject("data");
+				//passwordData = jsonResponse.getAsJsonArray("data").get(0)
+					//	.getAsJsonObject();
 			}
 		}	
-		String secret = passwordData.get("password").getAsString();
+		//String secret = passwordData.get("password").getAsString();
 			
-		return secret;
+		return passwordData;
 
 	}
 
