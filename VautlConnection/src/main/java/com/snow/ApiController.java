@@ -33,9 +33,13 @@ import org.springframework.web.client.RestTemplate;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
+import com.google.gson.JsonObject;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
 @RestController
 public class ApiController {
@@ -46,20 +50,21 @@ public class ApiController {
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 	
-	@RequestMapping(value = "/v1/get-vault-secret", method = RequestMethod.GET)
-	public ResponseEntity<String> getVaultSecret(Model model)
+	@RequestMapping(value = "/v1/get-vault-secret", method = RequestMethod.POST)
+	public String getVaultSecret(Model model, @RequestBody String data)
 		 {
 		model.addAttribute("instanceInfo", instanceInfo);
 
 		String url = "";
-		String vaultToken="";
-
-		ObjectMapper mapper = new ObjectMapper();
-	//	Map<String, Object> requestParams;
+		String vaultToken=""; 
+		Gson gson = new GsonBuilder().create();
+		JsonObject jsonResponse = new JsonObject();
+		JsonObject resources = new JsonObject();
+		JsonObject passwordData = new JsonObject();
+		String clientName = data;
+		vaultToken = env.getProperty("vault-token");
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		//requestParams = mapper.readValue(data, Map.class);
-		vaultToken = "e97c6601-2986-2acc-83ef-e5e134d6fe7e";
-		url = "https://10.4.2.16:8200/v1/secret/aws-clients/acf-devtest/cf/creds/users/admin";
+		url = env.getProperty("vault-token");
 		
 		headers.add("X-Vault-Token", vaultToken);
 		
@@ -71,8 +76,25 @@ public class ApiController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return restTemplate.exchange(url, HttpMethod.GET, requestEntity,
-				String.class);
+		String response = restTemplate.exchange(url, HttpMethod.GET, requestEntity,
+				String.class).getBody();
+		try {
+			if(response !=null){
+				jsonResponse = gson.fromJson(response, JsonObject.class);
+			}
+		} catch (JsonSyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (jsonResponse != null) {
+			if (jsonResponse.getAsJsonArray("data") != null) {
+				passwordData = jsonResponse.getAsJsonArray("data").get(0)
+						.getAsJsonObject();
+			}
+		}	
+		String secret = passwordData.get("password").getAsString();
+			
+		return secret;
 
 	}
 
