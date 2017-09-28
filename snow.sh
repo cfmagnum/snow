@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "-------script for snow app push--"
 
- cf login --skip-ssl-validation -a https://api.sys.eu.cfdev.canopy-cloud.com -u admin -p YiuivK4jCpdGest37mtquvr9kyax}$
+ cf login --skip-ssl-validation -a https://api.sys.eu.cfdev.canopy-cloud.com -u admin -p YiuivK4jCpdGest37mtquvr9kyax}
 
 cf create-org snow
 cf target -o snow
