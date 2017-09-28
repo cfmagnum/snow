@@ -15,7 +15,7 @@ for word in $i
 do #arra+=($word);
 	cd $word
 	mvn clean install  -Dmaven.test.skip=true
-	cf push -m 500M
+	cf push
 	cd ../
 done 
 
