@@ -38,40 +38,48 @@ public class ApiController {
 	@Autowired
 	Environment env;
 	private String url = "https://uaa.sys.eu.cfdev.canopy-cloud.com/Users";
-	
 
 	RestTemplate restTemplate = new RestTemplate();
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 	private Gson gson = new Gson();
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return ResponseEntity<String>
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 *             This method is used for creation of user
+	 */
 	@RequestMapping(value = "/v1/create-user", method = RequestMethod.POST)
 	public ResponseEntity<String> Create_User(Model model,
-			@RequestBody String json) throws FileNotFoundException, IOException {
+			@RequestBody String data) throws FileNotFoundException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		String url="";
-	    String clientName="";
-	    String authToken="";
-	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-	    ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> requestParams = mapper.readValue(json, Map.class);
-	    authToken=(String) requestParams.get("authToken");
-		clientName =(String) requestParams.get("clientName");
+		String url = "";
+		String clientName = "";
+		String authToken = "";
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
+		authToken = (String) requestParams.get("authToken");
+		clientName = (String) requestParams.get("clientName");
 		Map<String, Object> params = new HashMap<String, Object>();
-		url=env.getProperty("url-" +clientName);
-		
+		url = env.getProperty("url-" + clientName);
+
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
 		headers.add("Accept", env.getProperty("Content-Type-json"));
-		
+
 		for (String key : requestParams.keySet()) {
-			if (key !="authToken"&& key!="clientName") {
+			if (key != "authToken" && key != "clientName") {
 				params.put(key, requestParams.get(key));
 			}
 		}
 		String jsonData = gson.toJson(params);
-		HttpEntity<String> httpEntity = new HttpEntity<>(
-				jsonData, headers);
+		HttpEntity<String> httpEntity = new HttpEntity<>(jsonData, headers);
 		try {
 			skipSslValidation(url);
 		} catch (Exception e) {
@@ -88,6 +96,10 @@ public class ApiController {
 
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {

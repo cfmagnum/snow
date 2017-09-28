@@ -36,23 +36,36 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ApiController {
 	@Autowired
 	Environment env;
-	
+
 	RestTemplate restTemplate = new RestTemplate();
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
-	@RequestMapping(value = "/v1/fetch-user-information" , method = RequestMethod.POST)
-	public ResponseEntity<String> getuserInfo(Model model,@RequestBody String data) throws JsonParseException, JsonMappingException, IOException {
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return ResponseEntity<String>
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 *             This method is used to fetch user information
+	 */
+	@RequestMapping(value = "/v1/fetch-user-information", method = RequestMethod.POST)
+	public ResponseEntity<String> getuserInfo(Model model,
+			@RequestBody String data) throws JsonParseException,
+			JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		String url="";
-	    String clientName="";
-	    String authToken="";
-	    ObjectMapper mapper = new ObjectMapper();
-	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-	    Map<String, Object> requestParams = mapper.readValue(data, Map.class);
-	    authToken=(String) requestParams.get("authToken");
-		clientName =(String) requestParams.get("clientName");
-        url=env.getProperty("url-" +clientName);
+		String url = "";
+		String clientName = "";
+		String authToken = "";
+		ObjectMapper mapper = new ObjectMapper();
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
+		authToken = (String) requestParams.get("authToken");
+		clientName = (String) requestParams.get("clientName");
+		url = env.getProperty("url-" + clientName);
 		headers.add("Authorization", authToken);
 
 		restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
@@ -72,6 +85,10 @@ public class ApiController {
 				String.class);
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {

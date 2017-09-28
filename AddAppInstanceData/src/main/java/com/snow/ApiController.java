@@ -45,29 +45,39 @@ public class ApiController {
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
-	@RequestMapping(value = "/v1/add-app-instance", method = RequestMethod.POST)
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            - parameters for post request
+	 * @return -ResponseEntity<String>
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
+	@RequestMapping(value = "v1/add-app-instance-data", method = RequestMethod.POST)
 	public ResponseEntity<String> AddAppInstanceData(Model model,
 			@RequestBody String data) throws JsonParseException,
 			JsonMappingException, IOException {
-		model.addAttribute("instanceInfo", instanceInfo); 
+		model.addAttribute("instanceInfo", instanceInfo);
 		Map<String, Object> params = new HashMap<String, Object>();
-		String authToken="";
-		String clientName="";
+		String authToken = "";
+		String clientName = "";
 		ObjectMapper mapper = new ObjectMapper();
 		requestParams = mapper.readValue(data, Map.class);
 		clientName = (String) requestParams.get("clientName");
 		authToken = (String) requestParams.get("authToken");
-		url = env.getProperty(clientName); 
+		url = env.getProperty(clientName);
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
 		headers.add("Host", env.getProperty("Host"));
-		
+
 		for (String key : requestParams.keySet()) {
 			if (key != "clientName" && key != authToken) {
 				params.put(key, requestParams.get(key));
 			}
 		}
-		
+
 		String jsonData = gson.toJson(params);
 		try {
 			skipSslValidation(url);
@@ -75,13 +85,16 @@ public class ApiController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		HttpEntity<String> httpEntity = new HttpEntity<>(
-				jsonData, headers);
+		HttpEntity<String> httpEntity = new HttpEntity<>(jsonData, headers);
 		return restTemplate.exchange(url, HttpMethod.POST, httpEntity,
 				String.class);
 
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {

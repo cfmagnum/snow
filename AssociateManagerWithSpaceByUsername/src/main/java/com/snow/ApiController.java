@@ -48,6 +48,16 @@ public class ApiController {
 	ApplicationInstanceInfo instanceInfo;
 	private Gson gson = new Gson();
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
 	@RequestMapping(value = "v1/associate-manager-with-space-by-username", method = RequestMethod.POST)
 	public ResponseEntity<String> associateManagerWithSpaceByUsername(
 			Model model, @RequestBody String data) throws JsonParseException,
@@ -98,16 +108,20 @@ public class ApiController {
 
 		String jsonData = gson.toJson(params);
 		HttpEntity<String> requestEntity = new HttpEntity<>(jsonData, headers);
-
-		System.out.println(requestEntity);
-
-		System.out.println(url);
-
 		ResponseEntity<String> response = restTemplate.exchange(url,
 				HttpMethod.PUT, requestEntity, String.class);
 		return response;
 	}
 
+	/**
+	 * @param orgName
+	 *            -Name of the Organization
+	 * @param authToken
+	 *            -Authorization token for UAA
+	 * @param host
+	 * @param clientName
+	 * @return String This method returns guid of the organization
+	 */
 	public String getOrgGuid(String orgName, String authToken, String host,
 			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
@@ -147,6 +161,17 @@ public class ApiController {
 		return orgId;
 	}
 
+	/**
+	 * @param orgGuid
+	 *            -guid of the organization
+	 * @param spaceName
+	 *            -name of the space
+	 * @param authToken
+	 *            -Authorization token for UAA
+	 * @param host
+	 * @param clientName
+	 * @return -String This method returns guid of space
+	 */
 	public String getSpaceGuid(String orgGuid, String spaceName,
 			String authToken, String host, String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
@@ -187,6 +212,10 @@ public class ApiController {
 		return guid;
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {

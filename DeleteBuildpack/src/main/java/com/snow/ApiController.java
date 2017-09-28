@@ -44,28 +44,39 @@ public class ApiController {
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return HttpStatus
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 *             This method is used to delete buildpack
+	 */
 	@RequestMapping(value = "/v1/delete-buildpack", method = RequestMethod.POST)
 	public HttpStatus deleteBuildpack(Model model, @RequestBody String data)
 			throws JsonParseException, JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-		
+
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
 		ObjectMapper mapper = new ObjectMapper();
-		String url="";
-		String authToken="";
-		String clientName="";
-		String buildpackName="";
-		String buildpackGuid ="";
-		String host="";
+		String url = "";
+		String authToken = "";
+		String clientName = "";
+		String buildpackName = "";
+		String buildpackGuid = "";
+		String host = "";
 		Map<String, Object> requestParams;
 		requestParams = mapper.readValue(data, Map.class);
-		authToken= (String) requestParams.get("authToken");
-		clientName=(String) requestParams.get("clientName");     
-		 buildpackName = (String) requestParams.get("name");
-		 host=env.getProperty("Host-"+clientName);
-		 buildpackGuid = getBuildpackGuid(buildpackName,authToken,host,clientName);
-		 url = env.getProperty("url-" +clientName) + "/"
-				+ buildpackGuid;
+		authToken = (String) requestParams.get("authToken");
+		clientName = (String) requestParams.get("clientName");
+		buildpackName = (String) requestParams.get("name");
+		host = env.getProperty("Host-" + clientName);
+		buildpackGuid = getBuildpackGuid(buildpackName, authToken, host,
+				clientName);
+		url = env.getProperty("url-" + clientName) + "/" + buildpackGuid;
 
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
@@ -85,17 +96,25 @@ public class ApiController {
 
 		HttpStatus response = restTemplate.exchange(url, HttpMethod.DELETE,
 				requestEntity, String.class).getStatusCode();
-		
+
 		return response;
 	}
 
-
-	public String getBuildpackGuid(String buildpackName,String authToken,String host, String clientName
-			) {
+	/**
+	 * @param buildpack
+	 *            -Name Name of the buildpack
+	 * @param authToken
+	 *            -Authorization token for UAA
+	 * @param host
+	 * @param clientName
+	 * @return String This method is used to return guid of buildpack
+	 */
+	public String getBuildpackGuid(String buildpackName, String authToken,
+			String host, String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String url = env.getProperty("url-" +clientName) + "?q=name:"
+		String url = env.getProperty("url-" + clientName) + "?q=name:"
 				+ buildpackName;
-	
+
 		String guid = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
@@ -131,6 +150,10 @@ public class ApiController {
 		return guid;
 	}
 
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {

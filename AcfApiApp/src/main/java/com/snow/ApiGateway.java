@@ -21,6 +21,13 @@ public class ApiGateway {
 	private RestTemplate restTemplate = new RestTemplate();
 	ApplicationInstanceInfo instanceInfo;
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -String
+	 */
 	@RequestMapping(value = "/v1/get-UAA-token", method = RequestMethod.POST)
 	public String getToken(Model model, @RequestBody String data) {
 		model.addAttribute("instanceInfo", instanceInfo);
@@ -28,6 +35,13 @@ public class ApiGateway {
 		return restTemplate.postForObject(url, data, String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/add-build-pack", method = RequestMethod.POST)
 	public ResponseEntity<String> addBuildpack(Model model,
 			@RequestBody String data) {
@@ -38,6 +52,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -HttpStatus
+	 */
 	@RequestMapping(value = "/v1/delete-buildpack", method = RequestMethod.POST)
 	public HttpStatus DeleteBuildpack(Model model, @RequestBody String data) {
 		model.addAttribute("instanceInfo", instanceInfo);
@@ -48,6 +69,13 @@ public class ApiGateway {
 
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/add-app-instance-data", method = RequestMethod.POST)
 	public ResponseEntity<String> addAppInstance(Model model,
 			@RequestBody String data) {
@@ -58,6 +86,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return- HttpStatus
+	 */
 	@RequestMapping(value = "/v1/delete-app-instance-data", method = RequestMethod.POST)
 	public HttpStatus DeleteApplication(Model model, @RequestBody String data) {
 		model.addAttribute("instanceInfo", instanceInfo);
@@ -67,6 +102,13 @@ public class ApiGateway {
 				String.class).getStatusCode();
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return- ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/create-space", method = RequestMethod.POST)
 	public ResponseEntity<String> CreateSpace(Model model,
 			@RequestBody String data) {
@@ -77,6 +119,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/create-organization", method = RequestMethod.POST)
 	public ResponseEntity<String> CreateOrganization(Model model,
 			@RequestBody String data) {
@@ -87,6 +136,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/associate-user-with-org", method = RequestMethod.POST)
 	public ResponseEntity<String> AssociateUserWithOrg(Model model,
 			@RequestBody String data) {
@@ -97,6 +153,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/associate-auditor-with-org", method = RequestMethod.POST)
 	public ResponseEntity<String> AssociateAuditorwithOrg(Model model,
 			@RequestBody String data) {
@@ -107,6 +170,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/associate_auditor_with_the_org_by_username", method = RequestMethod.POST)
 	public ResponseEntity<String> AssociateAuditorwithOrgByUserName(
 			Model model, @RequestBody String data) {
@@ -118,6 +188,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/associate_manager_with_the_org_by_username", method = RequestMethod.POST)
 	public ResponseEntity<String> associateManagerwiththeOrgbyUsername(
 			Model model, @RequestBody String data) {
@@ -129,6 +206,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/associate_billing_manager_with_the_organization_by_username", method = RequestMethod.POST)
 	public ResponseEntity<String> associateBillingManagerwiththeOrgbyUsername(
 			Model model, @RequestBody String data) {
@@ -140,6 +224,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -HttpStatus
+	 */
 	@RequestMapping(value = "/v1/delete-org", method = RequestMethod.POST)
 	public HttpStatus DeleteOrg(Model model, @RequestBody String data) {
 		model.addAttribute("instanceInfo", instanceInfo);
@@ -149,6 +240,13 @@ public class ApiGateway {
 				String.class).getStatusCode();
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/associate-user-with-space", method = RequestMethod.POST)
 	public ResponseEntity<String> AssociateUserWithSpace(Model model,
 			@RequestBody String data) {
@@ -159,6 +257,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/associate-auditor-with-space", method = RequestMethod.POST)
 	public ResponseEntity<String> AssociateAuditorWithSpace(Model model,
 			@RequestBody String data) {
@@ -169,6 +274,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/associate-auditor-with-space-by-username", method = RequestMethod.POST)
 	public ResponseEntity<String> associateAuditorWithSpaceByUsername(
 			Model model, @RequestBody String data) {
@@ -180,6 +292,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/associate-developer-with-space-by-username", method = RequestMethod.POST)
 	public ResponseEntity<String> AssociatedeveloperWithSpace(Model model,
 			@RequestBody String data) {
@@ -190,6 +309,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/associate-manager-with-space-by-username", method = RequestMethod.POST)
 	public ResponseEntity<String> AssociateManagerWithSpaceByUsername(
 			Model model, @RequestBody String data) {
@@ -201,6 +327,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/create-quota-definition", method = RequestMethod.POST)
 	public ResponseEntity<String> CreateQuotaDefinition(Model model,
 			@RequestBody String data) {
@@ -211,6 +344,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/update-quota-size-of-space", method = RequestMethod.POST)
 	public ResponseEntity<String> UpdateQuotaSizeForSpace(Model model,
 			@RequestBody String data) {
@@ -221,6 +361,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/update-quota-size-of-org", method = RequestMethod.POST)
 	public ResponseEntity<String> UpdateQuotaSizeForOrg(Model model,
 			@RequestBody String data) {
@@ -231,6 +378,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/create-user", method = RequestMethod.POST)
 	public ResponseEntity<String> UserCreation(Model model,
 			@RequestBody String data) {
@@ -241,6 +395,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/reset-password-of-user", method = RequestMethod.POST)
 	public ResponseEntity<String> ResetPasswordOfUser(Model model,
 			@RequestBody String data) {
@@ -251,6 +412,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -HttpStatus
+	 */
 	@RequestMapping(value = "/v1/delete-user", method = RequestMethod.POST)
 	public HttpStatus DeleteUser(Model model, @RequestBody String data) {
 		model.addAttribute("instanceInfo", instanceInfo);
@@ -261,6 +429,13 @@ public class ApiGateway {
 
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/fetch-user-information", method = RequestMethod.POST)
 	public ResponseEntity<String> FetchUserInfoApp(Model model,
 			@RequestBody String data) {
@@ -271,6 +446,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/update-service-broker", method = RequestMethod.POST)
 	public ResponseEntity<String> UpdateServiceBroker(Model model,
 			@RequestBody String data) {
@@ -281,6 +463,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/list-Organizations", method = RequestMethod.POST)
 	public ResponseEntity<String> ListOrganizations(Model model,
 			@RequestBody String data) {
@@ -294,6 +483,13 @@ public class ApiGateway {
 		// return restTemplate.postForObject(url, data, String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/list-spaces", method = RequestMethod.POST)
 	public ResponseEntity<String> ListSpacesinOrgs(Model model,
 			@RequestBody String data) {
@@ -304,6 +500,13 @@ public class ApiGateway {
 				String.class);
 	}
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return -ResponseEntity<String>
+	 */
 	@RequestMapping(value = "/v1/list-users", method = RequestMethod.POST)
 	public ResponseEntity<String> ListUsers(Model model,
 			@RequestBody String data) {

@@ -45,34 +45,43 @@ public class ApiController {
 	@Autowired(required = false)
 	ApplicationInstanceInfo instanceInfo;
 
+	/**
+	 * @param model
+	 *            -to read vcap parameters to conncet with CF
+	 * @param data
+	 *            -parameters for post request
+	 * @return ResponseEntity<String>
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 *             This method is used to list spaces
+	 */
 	@RequestMapping(value = "/v1/list-spaces", method = RequestMethod.POST)
 	public ResponseEntity<String> associateUserWithOrg(Model model,
 			@RequestBody String data) throws JsonParseException,
 			JsonMappingException, IOException {
 		model.addAttribute("instanceInfo", instanceInfo);
-	
-		String url="";
-	    String clientName="";
-	    String authToken="";
-	    String orgName ="";
-	    String orgGuid="";
-	    String host ="";
-	    ObjectMapper mapper = new ObjectMapper();
-	    MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-	    Map<String, Object> requestParams = mapper.readValue(data, Map.class);
-	    authToken=(String) requestParams.get("authToken");
-		clientName =(String) requestParams.get("clientName");
-		host=env.getProperty("Host-"+clientName);
-		
+
+		String url = "";
+		String clientName = "";
+		String authToken = "";
+		String orgName = "";
+		String orgGuid = "";
+		String host = "";
+		ObjectMapper mapper = new ObjectMapper();
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		Map<String, Object> requestParams = mapper.readValue(data, Map.class);
+		authToken = (String) requestParams.get("authToken");
+		clientName = (String) requestParams.get("clientName");
+		host = env.getProperty("Host-" + clientName);
 
 		HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(
 				requestParams, headers);
 
 		orgName = (String) requestParams.get("organizationName");
-		orgGuid = getOrgGuid(orgName,authToken,host,clientName);
-		
+		orgGuid = getOrgGuid(orgName, authToken, host, clientName);
 
-		url = env.getProperty("url-" +clientName) + "/" + orgGuid + "/spaces";
+		url = env.getProperty("url-" + clientName) + "/" + orgGuid + "/spaces";
 		headers.add("Authorization", authToken);
 		headers.add("Content-Type", env.getProperty("Content-Type-json"));
 		headers.add("Accept", host);
@@ -95,16 +104,21 @@ public class ApiController {
 		return response;
 	}
 
-	public String getUaaToken() {
-		String token = restTemplate.getForObject(env.getProperty("uaaUrl"),
-				String.class);
-		return token;
-	}
-
-	public String getOrgGuid(String orgName,String authToken,String host, String clientName) {
+	/**
+	 * @param orgName
+	 *            -Name of the Organization
+	 * @param authToken
+	 *            -Authorization token for UAA
+	 * @param host
+	 * @param clientName
+	 * @return String This method returns guid of the organization
+	 */
+	public String getOrgGuid(String orgName, String authToken, String host,
+			String clientName) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		String urlForId = env.getProperty("url-" +clientName)+ "?q=name:" + orgName;
-		
+		String urlForId = env.getProperty("url-" + clientName) + "?q=name:"
+				+ orgName;
+
 		String orgId = "";
 		JsonObject resources = new JsonObject();
 		Gson gson = new GsonBuilder().create();
@@ -138,7 +152,10 @@ public class ApiController {
 		return orgId;
 	}
 
-
+	/**
+	 * @param ConnectionURL
+	 * @throws Exception
+	 */
 	public void skipSslValidation(String ConnectionURL) throws Exception {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
