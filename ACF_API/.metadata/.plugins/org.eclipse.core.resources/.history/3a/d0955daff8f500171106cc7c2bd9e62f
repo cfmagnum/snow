@@ -1,0 +1,41 @@
+package com.acfapi.services;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+
+import com.acfapi.entity.QuotaDefinition;
+
+public class QuotaDefinitionService {
+	@Autowired
+	Environment env;
+	
+	public void createQuotaDefinition(QuotaDefinition quotaDefinition){
+		RestTemplate restTemplate = new RestTemplate();
+		
+		
+	}
+	
+	private Map<String,String> getHeader(){
+		
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		
+		headers.add("Authorization", getAuthToken());
+		headers.add("Content-Type", env.getProperty("Content-Type-json"));
+		headers.add("Accept", env.getProperty("Host"));
+	}
+	
+	private String getAuthToken(){
+		
+		return null;
+		
+	
+	}
+	
+	
+
+}

@@ -1,0 +1,59 @@
+package com.acfapi.services;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+
+import com.acfapi.entity.QuotaDefinition;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+public class QuotaDefinitionService {
+	@Autowired
+	Environment env;
+	
+	public void createQuotaDefinition(QuotaDefinition quotaDefinition, String clientId){
+		RestTemplate restTemplate = new RestTemplate();
+		String url;
+		MultiValueMap<String, String> headers;
+		String quotaDefJson;
+		url = getURL(clientId);
+		headers = getHeader();
+		
+		Gson gson = new GsonBuilder().create();
+		quotaDefJson = gson.toJson(quotaDefinition);
+		HttpEntity<QuotaDefinition> requestEntity = new HttpEntity<>(quotaDefJson, headers);
+		
+		
+		
+	}
+	
+	private MultiValueMap<String, String> getHeader(){
+		
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		
+		headers.add("Authorization", getAuthToken());
+		headers.add("Content-Type", env.getProperty("Content-Type-json"));
+		headers.add("Accept", env.getProperty("Host"));
+		
+		return headers;
+	}
+	
+	private String getAuthToken(){
+		
+		return null;
+		
+	
+	}
+	private String getURL(String clientId){
+		return env.getProperty("url-" + clientId);
+	}
+	
+	
+
+}

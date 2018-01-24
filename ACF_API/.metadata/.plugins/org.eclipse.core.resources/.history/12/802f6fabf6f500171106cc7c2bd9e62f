@@ -1,0 +1,48 @@
+package com.acfapi.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.acfapi.entity.QuotaDefinition;
+import com.acfapi.services.QuotaDefinitionService;
+
+@RestController
+public class QuotaDefinitionMgmt {
+	
+	@Autowired
+	private QuotaDefinitionService quotaDefinitionService;
+
+	@RequestMapping(value = "/create_quota-definition", consumes = "application/json", produces = "application/json", method = RequestMethod.POST)
+	public void createQuotaDefinition(@RequestHeader String header, @RequestBody QuotaDefinition quotaDefinition){
+		Boolean validQuotaName;
+		Boolean validTotalServices;
+		
+		validQuotaName = validateQuotaName(quotaDefinition.getName());
+		validTotalServices = validateTotalServices(quotaDefinition.getTotal_services());
+		
+		if(validQuotaName && validTotalServices){
+		
+			quotaDefinitionService.createQuotaDefinition();
+		
+		}
+		
+		
+	}
+
+	private Boolean validateTotalServices(int total_services) {
+		
+		return true;
+	}
+
+	private boolean validateQuotaName(String name) {
+	   
+		return true;
+	}
+	
+	
+	
+}

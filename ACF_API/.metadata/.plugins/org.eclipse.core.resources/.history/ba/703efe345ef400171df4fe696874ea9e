@@ -1,0 +1,9 @@
+package com.acfapi.entity;
+
+public class QuotaDifinition {
+  
+	private String name;
+	private boolean non_basic_services_allowed;
+	private int total_services;
+	
+}

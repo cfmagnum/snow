@@ -1,0 +1,11 @@
+package xample.com.deme 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class AcfapiApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(AcfapiApplication.class, args);
+	}
+}

@@ -1,0 +1,14 @@
+package com.acfapi.services;
+
+import org.springframework.web.client.RestTemplate;
+
+public class QuotaDefinitionService {
+	
+	public void createQuotaDefinition(QuotaDefinition quotaDefinition){
+		RestTemplate restTemplate = new RestTemplate();
+		
+	}
+	
+	
+
+}
