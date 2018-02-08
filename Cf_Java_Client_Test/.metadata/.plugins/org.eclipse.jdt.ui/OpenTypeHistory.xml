@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<typeInfoHistroy>
+<typeInfo handle="=CF-Client-Itsm/C:\/Users\/admin\/.m2\/repository\/org\/cloudfoundry\/cloudfoundry-client-reactor\/3.3.0.RELEASE\/cloudfoundry-client-reactor-3.3.0.RELEASE.jar&lt;org.cloudfoundry.reactor(DefaultConnectionContext.class[DefaultConnectionContext" modifiers="49" timestamp="1517468538036"/>
+<typeInfo handle="=CF-Client-Itsm/C:\/Users\/admin\/.m2\/repository\/org\/cloudfoundry\/cloudfoundry-client-reactor\/3.3.0.RELEASE\/cloudfoundry-client-reactor-3.3.0.RELEASE.jar&lt;org.cloudfoundry.reactor.tokenprovider(PasswordGrantTokenProvider.class[PasswordGrantTokenProvider" modifiers="49" timestamp="1517468538036"/>
+<typeInfo handle="=CF-Client-Itsm/C:\/Users\/admin\/.m2\/repository\/org\/cloudfoundry\/cloudfoundry-client-reactor\/3.3.0.RELEASE\/cloudfoundry-client-reactor-3.3.0.RELEASE.jar&lt;org.cloudfoundry.reactor.client(ReactorCloudFoundryClient.class[ReactorCloudFoundryClient" modifiers="49" timestamp="1517468538036"/>
+<typeInfo handle="=CF-Client-Itsm/C:\/Users\/admin\/.m2\/repository\/org\/cloudfoundry\/cloudfoundry-operations\/3.3.0.RELEASE\/cloudfoundry-operations-3.3.0.RELEASE.jar&lt;org.cloudfoundry.operations.applications(_PushApplicationRequest.class[_PushApplicationRequest" modifiers="1056" timestamp="1517468562001"/>
+</typeInfoHistroy>

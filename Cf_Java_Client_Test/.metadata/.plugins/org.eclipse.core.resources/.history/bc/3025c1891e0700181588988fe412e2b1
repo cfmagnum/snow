@@ -1,0 +1,21 @@
+package com.itsm.implementation;
+
+public class AppConfig {
+	
+	@Bean
+	DefaultConnectionContext connectionContext(@Value("${cf.apiHost}") String apiHost) {
+	    return DefaultConnectionContext.builder()
+	        .apiHost(apiHost)
+	        .build();
+	}
+
+	@Bean
+	PasswordGrantTokenProvider tokenProvider(@Value("${cf.username}") String username,
+	                                         @Value("${cf.password}") String password) {
+	    return PasswordGrantTokenProvider.builder()
+	        .password(password)
+	        .username(username)
+	        .build();
+	}
+
+}

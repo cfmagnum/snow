@@ -1,0 +1,5 @@
+cf.apiHost = 
+cf.username= admin
+cf.password=
+cf.organization= itsm
+cf.space= test

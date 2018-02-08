@@ -1,0 +1,17 @@
+package com.itsm.implementation;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+public class AppController {
+	
+	@RequestMapping(value = "/getOrgs", method = RequestMethod.GET)
+	public void ListOrgs()  {
+		cloudFoundryOperations cloudFoundryOperations = beanFactory.getBean();
+		cloudFoundryOperations.organizations()
+	    .list()
+	    .map(OrganizationSummary::getName)
+	    .subscribe(System.out::println);
+	}
+
+}

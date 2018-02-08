@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="org.springframework.boot.SpringApplication"/>
+<fullyQualifiedTypeName name="org.springframework.context.ConfigurableApplicationContext"/>
+<fullyQualifiedTypeName name="org.cloudfoundry.operations.CloudFoundryOperations"/>
+<fullyQualifiedTypeName name="org.cloudfoundry.operations.organizations.OrganizationSummary"/>
+</qualifiedTypeNameHistroy>
